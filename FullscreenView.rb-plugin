@@ -1,0 +1,9 @@
+[RB Plugin]
+Loader=python
+Module=FullscreenView
+IAge=1
+Name=Fullscreen View
+Description=Display album art and minimalistic info about what's playing and what's next. Indeed very useful for parties.
+Authors=Benjamin Bach <benjamin@overtag.dk>
+Copyright=Copyright © 2008 Benjamin Bach
+Website=http://www.overtag.dk
