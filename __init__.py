@@ -143,7 +143,7 @@ class FullscreenView (rb.Plugin):
     
     def notify_metadata(self, db, entry, field=None,metadata=None):
         """Subscribe to metadata changes from database"""
-        if entry == self.shell.get_player().get_playing_entry():
+        if entry != self.shell.get_player().get_playing_entry():
             self.set_cover_art(entry)
     
     def set_cover_art(self, entry):
