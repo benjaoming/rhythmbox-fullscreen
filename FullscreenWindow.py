@@ -144,6 +144,7 @@ class FullscreenWindow(gtk.Window):
         index = self.track_widgets.index(widget)
         if index==0:
             self.backend.playpause()
+            self.show_info(self.track_infos[index])
         else:
             self.backend.play_entry(index)
     
