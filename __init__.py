@@ -85,6 +85,8 @@ class FullscreenView (rb.Plugin):
             self.player.play_entry(self.tracks[index]["entry"])
 
     def reload_play_pause(self, player, playing):
+        if not self.window.track_widgets:
+            return
         if playing:
             elapsed = player.get_playing_time()
             self.window.track_widgets[0].paused=False
@@ -153,11 +155,9 @@ class FullscreenView (rb.Plugin):
     def get_cover(self, entry):
         if entry:
             
-            # Todo: Get both pixbufs, compare them and use the largest one?
-            
-            # Try to find an album cover in the folder of the currently playing track
-            # Thanks Adrien!
+            # TODO: Get both pixbufs, compare them and use the largest one?
             # TODO: Make prettier
+            # Try to find an album cover in the folder of the currently playing track
             cover_dir = path.dirname(url2pathname(entry.get_playback_uri()).replace('file://', ''))
             # TODO: use os.walk()
             # TODO: just pick any picture in the directory
@@ -167,7 +167,8 @@ class FullscreenView (rb.Plugin):
                     mt = mimetypes.guess_type(file_name)[0]
                     if mt and mt.startswith('image/'):
                         #if path.splitext(f)[0].lower() in ['cover', 'album', 'albumart', '.folder', 'folder']:
-                        return gtk.gdk.pixbuf_new_from_file_at_size (file_name,300,300)
+                        # TODO: Use proportions from configuration
+                        return gtk.gdk.pixbuf_new_from_file_at_size (file_name, 800, 800)
 
             # Otherwise use what's found by the album art plugin
             db = self.shell.get_property("db")

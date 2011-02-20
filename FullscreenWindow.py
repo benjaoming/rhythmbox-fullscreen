@@ -14,6 +14,9 @@ _track1Fg = "#FFF"
 _track2Fg = "#888"
 _track3Fg = "#666"
 
+_albumCoverHeight = 300 #pixels
+_albumCoverWidth  = 300 #pixels
+
 class FullscreenWindow(gtk.Window):
     
     INFO_STATUS_IDLE  = "Player idle"
@@ -39,7 +42,9 @@ class FullscreenWindow(gtk.Window):
         self.table.set_row_spacings(4)
         self.table.set_col_spacings(10)
 
-        self.no_artwork = gtk.gdk.pixbuf_new_from_file_at_size (path+"/rhythmbox-missing-artwork.svg",300,300)
+        self.no_artwork = gtk.gdk.pixbuf_new_from_file_at_size (path+"/rhythmbox-missing-artwork.svg",
+                                                                _albumCoverWidth,
+                                                                _albumCoverHeight)
         self.album_widget = gtk.Image()
         self.set_artwork()
         
@@ -215,8 +220,17 @@ class FullscreenWindow(gtk.Window):
         if not pixbuf:
             self.albumPixbuf = self.no_artwork
         else:
-            pixbuf = pixbuf.scale_simple(300,300,gtk.gdk.INTERP_BILINEAR)
-            self.albumPixbuf = pixbuf
+            # Keep aspect ratios
+            h = pixbuf.get_height()
+            w = pixbuf.get_width()
+            if h == 0 or w == 0:
+                self.albumPixbuf = self.no_artwork
+            else:
+                scaled_w = w/(h/float(_albumCoverHeight)) if h > w else _albumCoverWidth
+                scaled_h = h/(w/float(_albumCoverWidth))  if w > h else _albumCoverHeight
+                pixbuf = pixbuf.scale_simple(int(scaled_w), int(scaled_h),
+                                             gtk.gdk.INTERP_BILINEAR)
+                self.albumPixbuf = pixbuf
         
         self.album_widget.set_from_pixbuf(self.albumPixbuf)
         self.album_widget.show_all()
