@@ -1,8 +1,15 @@
-import rb, gtk, gobject,mimetypes
+# -*- coding: utf-8 -*-
+import mimetypes
+
+from gi.repository import GObject, Gio, Gtk, Peas, RB, GLib, GdkPixbuf
+
+import os
 
 from FullscreenWindow import *
+
 from os import path, listdir
 from urllib import url2pathname
+
 ui_str = \
 """<ui>
   <menubar name="MenuBar">
@@ -19,44 +26,53 @@ ui_str = \
   </toolbar>
 </ui>"""
 
-class FullscreenView (rb.Plugin):
+class FullscreenView (GObject.Object, Peas.Activatable):
+
+    object = GObject.property(type=GObject.Object)
 
     def __init__(self):
-        rb.Plugin.__init__(self)
-        
-    def activate(self, shell):
+    		super(FullscreenView, self).__init__()
+        #self.settings = Gio.Settings("")
+                
+    def find_file(self, fname):
+        my_path = os.path.abspath(os.path.split(__file__)[0])
+        return os.path.join(my_path, fname)
+    
+    def do_activate(self):
+        shell = self.object
         data = {}
-        manager = shell.get_player().get_property("ui-manager")
-        self.player = shell.get_player()
         self.shell = shell
-        
         # Add "view-fullscreen" icon.
         icon_file_name = self.find_file("view-fullscreen.svg")
-        iconsource = gtk.IconSource()
+        iconsource = Gtk.IconSource()
         iconsource.set_filename(icon_file_name)
-        iconset = gtk.IconSet()
+        iconset = Gtk.IconSet()
         iconset.add_source(iconsource)
-        iconfactory = gtk.IconFactory()
+        iconfactory = Gtk.IconFactory()
         iconfactory.add("view-fullscreen", iconset)
         iconfactory.add_default()
-        action = gtk.Action("ToggleFullscreen", "Full Screen",
+        action = Gtk.Action("ToggleFullscreen", "Full Screen",
                             "Full Screen Mode",
                             "view-fullscreen");
         action.connect("activate", self.show_fullscreen, shell)
         
-        data['action_group'] = gtk.ActionGroup('FullscreenPluginActions')
+        data['action_group'] = Gtk.ActionGroup('FullscreenPluginActions')
         data['action_group'].add_action(action)
-        manager.insert_action_group(data['action_group'], 0)
-        data['ui_id'] = manager.add_ui_from_string(ui_str)
-        manager.ensure_update()
+        
+        uim = shell.props.ui_manager
+        uim.insert_action_group(data['action_group'], 0)
+        data['ui_id'] = uim.add_ui_from_string(ui_str)
+        uim.ensure_update()
+
         shell.set_data('FullscreenPluginInfo', data)
 
-    def deactivate(self, shell):
+    def do_deactivate(self):
+        shell = self.object
         data = shell.get_data('FullscreenPluginInfo')
-        manager = shell.get_player().get_property('ui-manager')
-        manager.remove_ui(data['ui_id'])
-        manager.remove_action_group(data['action_group'])
-        manager.ensure_update()
+        uim = shell.props.ui_manager
+        uim.remove_ui(data['ui_id'])
+        uim.remove_action_group(data['action_group'])
+        uim.ensure_update()
 
     def show_fullscreen(self, event, shell):
         self.window = FullscreenWindow(fullscreen=True,
@@ -64,6 +80,7 @@ class FullscreenView (rb.Plugin):
                                        backend=self)
         
         # Receive notification of song changes
+        self.player = shell.props.shell_player
         self.player.connect("playing-song-changed", self.reload_playlist)
         self.player.connect("playing-changed", self.reload_play_pause)
 
@@ -82,7 +99,8 @@ class FullscreenView (rb.Plugin):
         
     def play_entry(self, index):
         if len(self.tracks) > index:
-            self.player.play_entry(self.tracks[index]["entry"])
+            print dir(self.shell.props)
+            self.player.play_entry(self.tracks[index]["entry"], self.shell.get_property("library-source"))
 
     def reload_play_pause(self, player, playing):
         if not self.window.track_widgets:
@@ -130,22 +148,21 @@ class FullscreenView (rb.Plugin):
         return entries
 
     def get_track_info(self, entry):
-        import rhythmdb
-        db = self.shell.get_property ("db")
-        artist = db.entry_get(entry, rhythmdb.PROP_ARTIST)
-        album = db.entry_get(entry, rhythmdb.PROP_ALBUM)
-        title = db.entry_get(entry, rhythmdb.PROP_TITLE)
-        duration = db.entry_get(entry, rhythmdb.PROP_DURATION)
+        db = self.shell.props.db
+        artist = entry.get_string(RB.RhythmDBPropType.ARTIST)
+        album = entry.get_string(RB.RhythmDBPropType.ALBUM)
+        title = entry.get_string(RB.RhythmDBPropType.TITLE)
+        duration = entry.get_ulong(RB.RhythmDBPropType.DURATION)
         track = {"artist":artist,
                  "album":album,
                  "title":title,
-                 "duration":duration,
+                 "duration": duration,
                  "entry":entry}
         return track
     
     def notify_metadata(self, db, entry, field=None,metadata=None):
         """Subscribe to metadata changes from database"""
-        if entry != self.shell.get_player().get_playing_entry():
+        if entry != self.object.props.shell_player.get_playing_entry():
             self.set_cover_art(entry)
     
     def set_cover_art(self, entry):
@@ -168,7 +185,7 @@ class FullscreenView (rb.Plugin):
                     if mt and mt.startswith('image/'):
                         #if path.splitext(f)[0].lower() in ['cover', 'album', 'albumart', '.folder', 'folder']:
                         # TODO: Use proportions from configuration
-                        return gtk.gdk.pixbuf_new_from_file_at_size (file_name, 800, 800)
+                        return GdkPixbuf.Pixbuf.new_from_file_at_size (file_name, 800, 800)
 
             # Otherwise use what's found by the album art plugin
             db = self.shell.get_property("db")
@@ -177,12 +194,13 @@ class FullscreenView (rb.Plugin):
     
     def reload_playlist(self, player, entry):
 
-        db = self.shell.get_property ("db")
+        db = self.shell.props.db
         
         # If nothing is playing then use current play order
         # to move to the next track.
         if not entry:
             try:
+                # TODO: Fix getting the next playing song
                 playorder = player.get_property("play-order-instance")
                 entry = playorder.get_next()
             except:

@@ -1,34 +1,35 @@
-#! /usr/bin/env python
+# -*- coding: utf-8 -*-
 import time, threading, thread
-import pygtk
-pygtk.require('2.0')
-import gtk, gobject, cairo, pangocairo
-gtk.gdk.threads_init()
+
+from gi.repository import GObject, Gio, Gtk, Peas, RB, GLib, Gdk, cairo, PangoCairo
+
 from math import pi
-from cgi import escape
 
 # Create a GTK+ widget on which we will draw using Cairo
-class RbVisuCairoWidget(gtk.DrawingArea):
+class RbVisuCairoWidget(Gtk.DrawingArea):
 
     # Draw in response to an expose-event
-    __gsignals__ = { "expose-event": "override" }
+    #__gsignals__ = { "expose-event": "override" }
 
+    def __init__ (self, upper=9, text=''):
+##        Gtk.Widget.__init__(self)
+        Gtk.DrawingArea.__init__(self)
+        self.set_size_request (200, 200)
+        self.connect('draw', self.do_draw_cb)
+##        self.show_all()  
     # Handle the expose-event by drawing
-    def do_expose_event(self, event):
-
+    def do_draw_cb(self, event, cr):
+    
         # Create the cairo context
-        cr = self.window.cairo_create()
+        #cr = self.window.cairo_create()
 
-        if True:
-            cr.set_source_rgba(1.0, 1.0, 1.0, 0.0) # Transparent
-        else:
-            cr.set_source_rgb(1.0, 1.0, 1.0) # Opaque white
+        cr.set_source_rgba(0, 0, 0, 0.0) # Transparent
 
         # Draw the background
-        cr.set_operator(cairo.OPERATOR_SOURCE)
+        #cr.set_operator(cairo.OPERATOR_SOURCE)
         cr.paint()
 
-        self.draw(cr, *self.window.get_size())
+        self.draw(cr, self.get_allocated_width(),self.get_allocated_height())
 
     def draw(self, cr, width, height):
         pass
@@ -40,8 +41,8 @@ class RbVisuCairoWidget(gtk.DrawingArea):
         '''Write some text on the context. Text must be valid Pango markup,
 and font must be a valid Pango font. Current point is not changed by this
 function.'''
-        pcr = pangocairo.CairoContext (cr)
-        layout = pcr.create_layout ()
+        pcr = PangoCairo.create_context(cr)
+        layout = PangoCairo.create_layout (pcr)
         layout.set_markup (markup)
         cr.save ()
         w, h = layout.get_pixel_size()
@@ -53,7 +54,7 @@ function.'''
             self.set_size_request(w,h)
 
         cr.move_to (x, y2)
-        pcr.show_layout (layout)
+        PangoCairo.show_layout(cr, layout)
         cr.restore ()
         
         return w,h
@@ -94,11 +95,11 @@ class RoundedRectButton(RbVisuCairoWidget):
         self.pulsating = False
         self.pulse_lock = False
         self.set_sensitive(True)
-        self.set_events ( gtk.gdk.LEAVE_NOTIFY_MASK
-                        | gtk.gdk.ENTER_NOTIFY_MASK
-                        | gtk.gdk.BUTTON_PRESS_MASK )
-        self.fg_color = gtk.gdk.color_parse(fg_color)
-        self.bg_color = gtk.gdk.color_parse(bg_color)
+        self.set_events ( Gdk.EventMask.LEAVE_NOTIFY_MASK
+                        | Gdk.EventMask.ENTER_NOTIFY_MASK
+                        | Gdk.EventMask.BUTTON_PRESS_MASK )
+        self.fg_color = Gdk.color_parse(fg_color)
+        self.bg_color = Gdk.color_parse(bg_color)
         self.original_bg = self.bg_color
         self.size1 = size1
         self.size2 = size2
@@ -123,13 +124,15 @@ class RoundedRectButton(RbVisuCairoWidget):
         self.track  = track
         self.duration = duration
     
-    def set_elapsed(self, elapsed=0.0):
+    def set_elapsed(self, elapsed=(False, 0.0)):
+        elapsed = elapsed[1]
         if not elapsed==0.0:
             self.progress = (elapsed*1.0)/self.duration
         else:
             self.progress = 0.0
 
-    def start_progress_bar(self, elapsed=0.0):
+    def start_progress_bar(self, elapsed=(False, 0.0)):
+        elapsed = elapsed[1]
         if not elapsed==0.0:
             self.progress = (elapsed*1.0)/self.duration
         else:
@@ -137,20 +140,20 @@ class RoundedRectButton(RbVisuCairoWidget):
         self.progress_bar_do()
         time_step = 100
         if self.progress_event_id:
-            gobject.source_remove(self.progress_event_id)
-        self.progress_event_id = gobject.timeout_add(time_step, self.progress_bar_do)
+            GObject.source_remove(self.progress_event_id)
+        self.progress_event_id = GObject.timeout_add(time_step, self.progress_bar_do)
     
     def progress_bar_do(self):
         time_step = 100
         if self.progress <= 1 and not self.paused and not self.duration == 0:
             self.progress += (time_step/1000.0)/self.duration
-            gobject.idle_add(self.queue_draw)
+            GObject.idle_add(self.queue_draw)
             return True
         return not self.paused
     
     def pulsate(self, widget, event):
         self.icon = self.icon_hover
-        self.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.HAND2))
+        #self.window.set_cursor(Gdk.Cursor(Gdk.HAND2))
         if not self.pulsating:
             self.pulsating = True
             self.pulsate_do()
@@ -167,28 +170,28 @@ class RoundedRectButton(RbVisuCairoWidget):
         pulse_steps = 20
         adjustment = 250
         def adjust(color,direction):
-            return gtk.gdk.Color(
+            return Gdk.Color(
                                  color.red+(adjustment*direction), 
                                  color.green+(adjustment*direction), 
                                  color.blue+(adjustment*direction)
                                  )
         if self.pulsating:
             self.bg_color = adjust(self.bg_color,direction)
-            gobject.idle_add(self.queue_draw)
+            GObject.idle_add(self.queue_draw)
             cnt += 1
             if cnt == pulse_steps:
                 cnt = 0
                 direction *= -1
             self.pulse_lock = False
-            gobject.timeout_add(20,self.pulsate_do,cnt,direction)
+            GObject.timeout_add(20,self.pulsate_do,cnt,direction)
 
         # restore after a pulse
         if not self.pulsating and self.original_bg.red <= self.bg_color.red:
             direction = -1
             self.bg_color = adjust(self.bg_color,direction)
-            gobject.idle_add(self.queue_draw)
+            GObject.idle_add(self.queue_draw)
             self.pulse_lock = False
-            gobject.timeout_add(20,self.pulsate_do,cnt,direction)
+            GObject.timeout_add(20,self.pulsate_do,cnt,direction)
 
         self.pulse_lock = False
 
@@ -199,18 +202,18 @@ class RoundedRectButton(RbVisuCairoWidget):
         
         # Create background rectangle
         self.draw_rounded_rectangle(cr, 0, 0, width, height, 5)
-        cr.set_source_color (self.bg_color)
+        cr.set_source_rgba(0.1,0.1,0.1, 1)
         cr.fill()
         
         # Draw progress bar
         if self.has_progress_bar and not self.duration==0:
             
             self.draw_rounded_rectangle(cr, 3, 3, (width-15)*self.progress, height-6, 4)
-            cr.set_source_color (gtk.gdk.color_parse("#111"))
+            cr.set_source_rgba(0.2, 0.2, 0.2, 1)
             cr.fill()
 
         # Draw icon
-#        cr.set_source_color (gtk.gdk.color_parse("#000"))
+#        cr.set_source_color (Gdk.color_parse("#000"))
 #        if self.icon == self.HOVER_ICON_PAUSE:
 #            cr.rectangle(width-26, 11, 5, 14)
 #            cr.rectangle(width-17, 11, 5, 14)
@@ -243,14 +246,15 @@ class RoundedRectButton(RbVisuCairoWidget):
         else:
             track_time = " (%s:%s)" % (number_format(self.duration/60), 
                                        number_format(self.duration % 60))
-        cr.set_source_color (self.fg_color)
+        cr.set_source_rgba (1,1,1,1)
+        # TODO: Escape
         m = ('<span font_family="Trebuchet MS, Liberation Sans, Sans">'+\
                 '<span size="%d">%s\n</span>'+\
                 '<span size="%d">%s\n</span>'+\
                 '<span size="%d">%s%s</span>'+\
-            '</span>') % (self.size1*1024, escape(self.artist), 
-                          self.size2*1024*.8, escape(self.album), 
-                          self.size2*1024, escape(self.track), 
+            '</span>') % (self.size1*1024, self.artist, 
+                          self.size2*1024*.8, self.album, 
+                          self.size2*1024, self.track, 
                           track_time)
         text_width,text_height = self.write(cr, m, 10, height/2,adjust_widget_size=False)
         

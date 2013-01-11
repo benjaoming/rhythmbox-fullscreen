@@ -25,7 +25,7 @@ class FullscreenTest(object):
 
 if __name__ == '__main__':
     w = FullscreenWindow(fullscreen = True)
-    w.track1.start_progress_bar()
+    #w.track1.start_progress_bar()
     w.connect("delete_event", gtk.main_quit)
     
     gtk.main()
