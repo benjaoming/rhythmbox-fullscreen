@@ -4,29 +4,22 @@ import time, threading, thread
 from gi.repository import GObject, Gio, Gtk, Peas, RB, GLib, Gdk, cairo, PangoCairo
 
 from math import pi
+from cgi import escape
 
 # Create a GTK+ widget on which we will draw using Cairo
 class RbVisuCairoWidget(Gtk.DrawingArea):
 
-    # Draw in response to an expose-event
-    #__gsignals__ = { "expose-event": "override" }
-
     def __init__ (self, upper=9, text=''):
-##        Gtk.Widget.__init__(self)
         Gtk.DrawingArea.__init__(self)
         self.set_size_request (200, 200)
         self.connect('draw', self.do_draw_cb)
-##        self.show_all()  
+
     # Handle the expose-event by drawing
     def do_draw_cb(self, event, cr):
     
-        # Create the cairo context
-        #cr = self.window.cairo_create()
-
-        cr.set_source_rgba(0, 0, 0, 0.0) # Transparent
+        cr.set_source_rgba(0, 0, 0, 1.0) # Transparent
 
         # Draw the background
-        #cr.set_operator(cairo.OPERATOR_SOURCE)
         cr.paint()
 
         self.draw(cr, self.get_allocated_width(),self.get_allocated_height())
@@ -34,10 +27,9 @@ class RbVisuCairoWidget(Gtk.DrawingArea):
     def draw(self, cr, width, height):
         pass
 
-    def write (
-               self, cr, markup="", x = 0, y = 0, vert_middle = True,
+    def write (self, cr, markup="",  x=0, y = 0, vert_middle = True, 
                adjust_widget_size = True
-               ):
+        ):
         '''Write some text on the context. Text must be valid Pango markup,
 and font must be a valid Pango font. Current point is not changed by this
 function.'''
@@ -247,14 +239,13 @@ class RoundedRectButton(RbVisuCairoWidget):
             track_time = " (%s:%s)" % (number_format(self.duration/60), 
                                        number_format(self.duration % 60))
         cr.set_source_rgba (1,1,1,1)
-        # TODO: Escape
         m = ('<span font_family="Trebuchet MS, Liberation Sans, Sans">'+\
                 '<span size="%d">%s\n</span>'+\
                 '<span size="%d">%s\n</span>'+\
                 '<span size="%d">%s%s</span>'+\
-            '</span>') % (self.size1*1024, self.artist, 
-                          self.size2*1024*.8, self.album, 
-                          self.size2*1024, self.track, 
+            '</span>') % (self.size1*1024, escape(self.artist), 
+                          self.size2*1024*.8, escape(self.album), 
+                          self.size2*1024, escape(self.track), 
                           track_time)
         text_width,text_height = self.write(cr, m, 10, height/2,adjust_widget_size=False)
         
