@@ -91,7 +91,7 @@ class RoundedRectButton(RbVisuCairoWidget):
                         | Gdk.EventMask.ENTER_NOTIFY_MASK
                         | Gdk.EventMask.BUTTON_PRESS_MASK )
         self.fg_color = Gdk.color_parse(fg_color)
-        self.bg_color = Gdk.color_parse(bg_color)
+        self.bg_color = (0.1, 0.1, 0.1, 1.0)
         self.original_bg = self.bg_color
         self.size1 = size1
         self.size2 = size2
@@ -160,15 +160,17 @@ class RoundedRectButton(RbVisuCairoWidget):
             return
         self.pulse_lock = True
         pulse_steps = 20
-        adjustment = 250
+        adjustment = 0.005
         def adjust(color,direction):
-            return Gdk.Color(
-                                 color.red+(adjustment*direction), 
-                                 color.green+(adjustment*direction), 
-                                 color.blue+(adjustment*direction)
-                                 )
+            return (
+                color[0]+(adjustment*direction), 
+                color[1]+(adjustment*direction), 
+                color[2]+(adjustment*direction),
+                1.0
+            )
+
         if self.pulsating:
-            self.bg_color = adjust(self.bg_color,direction)
+            self.bg_color = adjust(self.bg_color, direction)
             GObject.idle_add(self.queue_draw)
             cnt += 1
             if cnt == pulse_steps:
@@ -178,7 +180,7 @@ class RoundedRectButton(RbVisuCairoWidget):
             GObject.timeout_add(20,self.pulsate_do,cnt,direction)
 
         # restore after a pulse
-        if not self.pulsating and self.original_bg.red <= self.bg_color.red:
+        if not self.pulsating and self.original_bg[0] <= self.bg_color[0]:
             direction = -1
             self.bg_color = adjust(self.bg_color,direction)
             GObject.idle_add(self.queue_draw)
@@ -194,14 +196,17 @@ class RoundedRectButton(RbVisuCairoWidget):
         
         # Create background rectangle
         self.draw_rounded_rectangle(cr, 0, 0, width, height, 5)
-        cr.set_source_rgba(0.1,0.1,0.1, 1)
+        cr.set_source_rgba(*self.bg_color)
         cr.fill()
         
         # Draw progress bar
         if self.has_progress_bar and not self.duration==0:
             
             self.draw_rounded_rectangle(cr, 3, 3, (width-15)*self.progress, height-6, 4)
-            cr.set_source_rgba(0.2, 0.2, 0.2, 1)
+            ligten_factor = 1.5
+            progress_bar_color = map(lambda x: x*ligten_factor, self.bg_color[:3]) + [1.0]
+            print progress_bar_color
+            cr.set_source_rgba(*progress_bar_color)
             cr.fill()
 
         # Draw icon
