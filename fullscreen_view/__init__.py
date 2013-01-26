@@ -188,9 +188,12 @@ class FullscreenView (GObject.Object, Peas.Activatable):
                         return GdkPixbuf.Pixbuf.new_from_file_at_size (file_name, 800, 800)
 
             # Otherwise use what's found by the album art plugin
-            db = self.shell.get_property("db")
-            cover_art = db.entry_request_extra_metadata(entry, "rb:coverArt")
-            return cover_art
+            key = entry.create_ext_db_key(RB.RhythmDBPropType.ALBUM)
+            cover_db = RB.ExtDB(name='album-art')
+            art_location = cover_db.lookup(key)
+            
+            if art_location and path.exists(art_location):
+                return GdkPixbuf.Pixbuf.new_from_file_at_size (art_location, 800, 800)
     
     def reload_playlist(self, player, entry):
 
