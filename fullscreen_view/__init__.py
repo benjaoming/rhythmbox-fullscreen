@@ -31,7 +31,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
     object = GObject.property(type=GObject.Object)
 
     def __init__(self):
-    		super(FullscreenView, self).__init__()
+        super(FullscreenView, self).__init__()
         #self.settings = Gio.Settings("")
                 
     def find_file(self, fname):
@@ -149,14 +149,14 @@ class FullscreenView (GObject.Object, Peas.Activatable):
 
     def get_track_info(self, entry):
         db = self.shell.props.db
-        artist = entry.get_string(RB.RhythmDBPropType.ARTIST)
-        album = entry.get_string(RB.RhythmDBPropType.ALBUM)
-        title = entry.get_string(RB.RhythmDBPropType.TITLE)
+        artist = entry.get_string(RB.RhythmDBPropType.ARTIST).replace('&', '&amp;')
+        album = entry.get_string(RB.RhythmDBPropType.ALBUM).replace('&', '&amp;')
+        title = entry.get_string(RB.RhythmDBPropType.TITLE).replace('&', '&amp;')
         duration = entry.get_ulong(RB.RhythmDBPropType.DURATION)
         track = {"artist":artist,
                  "album":album,
                  "title":title,
-                 "duration": duration,
+                 "duration":duration,
                  "entry":entry}
         return track
     
