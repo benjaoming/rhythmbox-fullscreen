@@ -33,8 +33,7 @@ class RbVisuCairoWidget(Gtk.DrawingArea):
         '''Write some text on the context. Text must be valid Pango markup,
 and font must be a valid Pango font. Current point is not changed by this
 function.'''
-        pcr = PangoCairo.create_context(cr)
-        layout = PangoCairo.create_layout (pcr)
+        layout = PangoCairo.create_layout (cr)
         layout.set_markup (markup)
         cr.save ()
         w, h = layout.get_pixel_size()
@@ -46,6 +45,7 @@ function.'''
             self.set_size_request(w,h)
 
         cr.move_to (x, y2)
+        PangoCairo.update_layout (cr, layout)        
         PangoCairo.show_layout(cr, layout)
         cr.restore ()
         
@@ -74,7 +74,7 @@ class RoundedRectButton(RbVisuCairoWidget):
     HOVER_ICON_PLAY, HOVER_ICON_PAUSE, HOVER_ICON_SKIP = range(3)
     
     def __init__(self, 
-                 bg_color="#000", fg_color="#FFF", 
+                 bg_color=(0.1, 0.1, 0.1, 1.0), 
                  markup="", 
                  width=-1, height=-1,
                  size1=24, size2=18,
@@ -90,7 +90,6 @@ class RoundedRectButton(RbVisuCairoWidget):
         self.set_events ( Gdk.EventMask.LEAVE_NOTIFY_MASK
                         | Gdk.EventMask.ENTER_NOTIFY_MASK
                         | Gdk.EventMask.BUTTON_PRESS_MASK )
-        self.fg_color = Gdk.color_parse(fg_color)
         self.bg_color = (0.1, 0.1, 0.1, 1.0)
         self.original_bg = self.bg_color
         self.size1 = size1
@@ -205,7 +204,6 @@ class RoundedRectButton(RbVisuCairoWidget):
             self.draw_rounded_rectangle(cr, 3, 3, (width-15)*self.progress, height-6, 4)
             ligten_factor = 1.5
             progress_bar_color = map(lambda x: x*ligten_factor, self.bg_color[:3]) + [1.0]
-            print progress_bar_color
             cr.set_source_rgba(*progress_bar_color)
             cr.fill()
 

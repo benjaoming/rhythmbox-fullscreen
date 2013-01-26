@@ -104,7 +104,6 @@ class FullscreenWindow(Gtk.Window):
         for i in range(self.track_count):
             if i == 0:
                 t = RoundedRectButton( bg_color=_track1Bg,
-                                        fg_color=_track1Fg,
                                         width=500,
                                         size1=24, size2=18,
                                         has_progress_bar = True)
@@ -112,13 +111,11 @@ class FullscreenWindow(Gtk.Window):
                 self.track_infos.append(self.INFO_STATUS_PAUSE)
             elif i == 1:
                 t = RoundedRectButton( bg_color=_track2Bg,
-                                        fg_color=_track2Fg,
                                         width=500, size1=18, size2=14 )
                 self.track_infos.append(self.INFO_STATUS_SKIP)
                 #t.set_hover_icon(RoundedRectButton.HOVER_ICON_SKIP)
             else:
                 t = RoundedRectButton( bg_color=_track3Bg,
-                                        fg_color=_track3Fg,
                                         width=500, size1=14, size2=12 )
                 self.track_infos.append(self.INFO_STATUS_SKIP)
                 #t.set_hover_icon(RoundedRectButton.HOVER_ICON_SKIP)
