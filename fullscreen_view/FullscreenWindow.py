@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import thread, sys
+import sys
 
 from gi.repository import GObject, Gio, Gtk, Peas, RB, GLib, Gdk, GdkPixbuf
-
-Gdk.threads_init()
 
 from CairoWidgets import RoundedRectButton, RbVisuCairoWidget
 

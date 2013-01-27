@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import time, threading, thread
+import time
 
 from gi.repository import GObject, Gio, Gtk, Peas, RB, GLib, Gdk, cairo, PangoCairo
 
