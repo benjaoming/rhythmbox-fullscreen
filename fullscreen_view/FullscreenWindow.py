@@ -97,7 +97,7 @@ class FullscreenWindow(Gtk.Window):
         if self.vbox:
             self.vbox.destroy()
         self.vbox = Gtk.VBox(spacing=4)
-        self.vbox.set_size_request(500,500)
+        self.vbox.set_size_request(500,300)
 
         for i in range(self.track_count):
             if i == 0:

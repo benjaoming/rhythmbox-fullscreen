@@ -26,6 +26,10 @@ ui_str = \
   </toolbar>
 </ui>"""
 
+# Scales the prefetched album art for later use
+ALBUM_ART_W = 800
+ALBUM_ART_H = 800
+
 class FullscreenView (GObject.Object, Peas.Activatable):
 
     object = GObject.property(type=GObject.Object)
@@ -85,6 +89,8 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         self.player.connect("playing-changed", self.reload_play_pause)
 
         db = shell.get_property("db")
+        
+        # TODO: This signal is not fired - which should we listen for?
         db.connect_after ("entry-extra-metadata-notify::rb:coverArt", 
                           self.notify_metadata)
 
@@ -92,21 +98,21 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         self.reload_playlist(self.player, self.player.get_playing_entry())
 
     def playpause(self):
-        try:
-            self.player.playpause()
-        except:
-            self.play_entry(0)
+        # Argument 'True' is unused (see http://developer.gnome.org/rhythmbox/2.98/RBShellPlayer.html#rb-shell-player-playpause)
+        self.player.playpause(True)
         
     def play_entry(self, index):
         if len(self.tracks) > index:
-            print dir(self.shell.props)
             self.player.play_entry(self.tracks[index]["entry"], self.shell.get_property("library-source"))
 
     def reload_play_pause(self, player, playing):
         if not self.window.track_widgets:
             return
         if playing:
-            elapsed = player.get_playing_time()
+            try:
+                elapsed = player.get_playing_time()
+            except:
+                elapsed = (0,0)
             self.window.track_widgets[0].paused=False
             self.window.track_widgets[0].start_progress_bar(elapsed)
             self.window.current_info = "Now playing..."
@@ -183,9 +189,8 @@ class FullscreenView (GObject.Object, Peas.Activatable):
                     file_name = path.join(cover_dir, f)
                     mt = mimetypes.guess_type(file_name)[0]
                     if mt and mt.startswith('image/'):
-                        #if path.splitext(f)[0].lower() in ['cover', 'album', 'albumart', '.folder', 'folder']:
-                        # TODO: Use proportions from configuration
-                        return GdkPixbuf.Pixbuf.new_from_file_at_size (file_name, 800, 800)
+                        if True in map(lambda x: x in path.splitext(f)[0].lower(), ['cover', 'album', 'albumart', 'folder', 'front']):
+                            return GdkPixbuf.Pixbuf.new_from_file_at_size (file_name, ALBUM_ART_W, ALBUM_ART_H)
 
             # Otherwise use what's found by the album art plugin
             key = entry.create_ext_db_key(RB.RhythmDBPropType.ALBUM)
@@ -193,22 +198,14 @@ class FullscreenView (GObject.Object, Peas.Activatable):
             art_location = cover_db.lookup(key)
             
             if art_location and path.exists(art_location):
-                return GdkPixbuf.Pixbuf.new_from_file_at_size (art_location, 800, 800)
+                return GdkPixbuf.Pixbuf.new_from_file_at_size (art_location, ALBUM_ART_W, ALBUM_ART_H)
     
     def reload_playlist(self, player, entry):
 
-        db = self.shell.props.db
-        
-        # If nothing is playing then use current play order
-        # to move to the next track.
         if not entry:
-            try:
-                # TODO: Fix getting the next playing song
-                playorder = player.get_property("play-order-instance")
-                entry = playorder.get_next()
-            except:
-                print "play-order-instance not available"
-                return
+            # When there is no entry set for reload playlist, then what's happening?
+            # Is everything fine and totally inactive?
+            return
         
         # Set cover art
         self.set_cover_art(entry)
@@ -223,7 +220,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         try:
             elapsed = player.get_playing_time()
         except:
-            elapsed = 0.0
+            elapsed = (0.0, 0.0)
 
         if player.get_playing():
             self.window.track_widgets[0].start_progress_bar(elapsed)
