@@ -46,6 +46,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         shell = self.object
         data = {}
         self.shell = shell
+        
         # Add "view-fullscreen" icon.
         icon_file_name = self.find_file("view-fullscreen.svg")
         iconsource = Gtk.IconSource()
@@ -58,7 +59,9 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         action = Gtk.Action("ToggleFullscreen", "Full Screen",
                             "Full Screen Mode",
                             "view-fullscreen");
-        action.connect("activate", self.show_fullscreen, shell)
+        
+        # Connect a handler for pressing the button
+        action.connect("activate", self.show_fullscreen)
         
         data['action_group'] = Gtk.ActionGroup('FullscreenPluginActions')
         data['action_group'].add_action(action)
@@ -78,21 +81,21 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         uim.remove_action_group(data['action_group'])
         uim.ensure_update()
 
-    def show_fullscreen(self, event, shell):
+    def show_fullscreen(self, event):
         self.window = FullscreenWindow(fullscreen=True,
                                        path=self.find_file("."),
                                        backend=self)
         
         # Receive notification of song changes
-        self.player = shell.props.shell_player
+        self.player = self.shell.props.shell_player
         self.player.connect("playing-song-changed", self.reload_playlist)
         self.player.connect("playing-changed", self.reload_play_pause)
 
-        db = shell.get_property("db")
-        
-        # TODO: This signal is not fired - which should we listen for?
-        db.connect_after ("entry-extra-metadata-notify::rb:coverArt", 
-                          self.notify_metadata)
+        # TODO: This signal is not fired - which should we listen for? We should use the cover_db,
+        # but what are its signals??
+        cover_db = RB.ExtDB(name='album-art')
+        self.player.connect("playing-song-property-changed", self.notify_metadata)
+        cover_db.connect("added", self.notify_cover_art_change)
 
         # Load current state
         self.reload_playlist(self.player, self.player.get_playing_entry())
@@ -166,10 +169,12 @@ class FullscreenView (GObject.Object, Peas.Activatable):
                  "entry":entry}
         return track
     
-    def notify_metadata(self, db, entry, field=None,metadata=None):
+    def notify_metadata(self, player, uri, prop, *args, **kwargs):
         """Subscribe to metadata changes from database"""
-        if entry != self.object.props.shell_player.get_playing_entry():
-            self.set_cover_art(entry)
+        self.set_cover_art(player.get_playing_entry())
+    
+    def notify_cover_art_change(self, *args):
+        self.set_cover_art(self.shell.props.shell_player.get_playing_entry())
     
     def set_cover_art(self, entry):
         if entry:
@@ -178,12 +183,9 @@ class FullscreenView (GObject.Object, Peas.Activatable):
     def get_cover(self, entry):
         if entry:
             
-            # TODO: Get both pixbufs, compare them and use the largest one?
-            # TODO: Make prettier
             # Try to find an album cover in the folder of the currently playing track
             cover_dir = path.dirname(url2pathname(entry.get_playback_uri()).replace('file://', ''))
             # TODO: use os.walk()
-            # TODO: just pick any picture in the directory
             if path.isdir(cover_dir):
                 for f in listdir(cover_dir):
                     file_name = path.join(cover_dir, f)

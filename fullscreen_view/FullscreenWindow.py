@@ -3,7 +3,7 @@ import sys
 
 from gi.repository import GObject, Gio, Gtk, Peas, RB, GLib, Gdk, GdkPixbuf
 
-from CairoWidgets import RoundedRectButton, RbVisuCairoWidget
+from CairoWidgets import FullscreenEntryButton
 
 _track1Bg = "#222"
 _track2Bg = "#111"
@@ -101,22 +101,22 @@ class FullscreenWindow(Gtk.Window):
 
         for i in range(self.track_count):
             if i == 0:
-                t = RoundedRectButton( bg_color=_track1Bg,
+                t = FullscreenEntryButton( bg_color=_track1Bg,
                                         width=500,
                                         size1=24, size2=18,
                                         has_progress_bar = True)
-                #t.set_hover_icon(RoundedRectButton.HOVER_ICON_PAUSE)
+                #t.set_hover_icon(FullscreenEntryButton.HOVER_ICON_PAUSE)
                 self.track_infos.append(self.INFO_STATUS_PAUSE)
             elif i == 1:
-                t = RoundedRectButton( bg_color=_track2Bg,
+                t = FullscreenEntryButton( bg_color=_track2Bg,
                                         width=500, size1=18, size2=14 )
                 self.track_infos.append(self.INFO_STATUS_SKIP)
-                #t.set_hover_icon(RoundedRectButton.HOVER_ICON_SKIP)
+                #t.set_hover_icon(FullscreenEntryButton.HOVER_ICON_SKIP)
             else:
-                t = RoundedRectButton( bg_color=_track3Bg,
+                t = FullscreenEntryButton( bg_color=_track3Bg,
                                         width=500, size1=14, size2=12 )
                 self.track_infos.append(self.INFO_STATUS_SKIP)
-                #t.set_hover_icon(RoundedRectButton.HOVER_ICON_SKIP)
+                #t.set_hover_icon(FullscreenEntryButton.HOVER_ICON_SKIP)
             self.track_widgets.append(t)
             self.vbox.pack_start(t, False, False, 0)
             t.connect("button_press_event", self.track_click)
@@ -189,7 +189,6 @@ class FullscreenWindow(Gtk.Window):
         
         
     # Renew queue
-    # track[artist, album, title, duration]
     def set_tracks(self, tracks):
         self.track_count = len(tracks)
         self.reload_track_widgets()

@@ -7,7 +7,7 @@ from math import pi
 from cgi import escape
 
 # Create a GTK+ widget on which we will draw using Cairo
-class RbVisuCairoWidget(Gtk.DrawingArea):
+class RoundedButtonPangoCairoWidget(Gtk.DrawingArea):
 
     def __init__ (self, upper=9, text=''):
         Gtk.DrawingArea.__init__(self)
@@ -69,7 +69,7 @@ function.'''
         cr.close_path ()
 
 
-class RoundedRectButton(RbVisuCairoWidget):
+class FullscreenEntryButton(RoundedButtonPangoCairoWidget):
     
     HOVER_ICON_PLAY, HOVER_ICON_PAUSE, HOVER_ICON_SKIP = range(3)
     
@@ -80,7 +80,7 @@ class RoundedRectButton(RbVisuCairoWidget):
                  size1=24, size2=18,
                  has_progress_bar = False):
         
-        super(RoundedRectButton, self).__init__()
+        super(FullscreenEntryButton, self).__init__()
 
         self.connect("enter_notify_event", self.pulsate)
         self.connect("leave_notify_event", self.pulsate_stop)
@@ -133,7 +133,7 @@ class RoundedRectButton(RbVisuCairoWidget):
         if self.progress_event_id:
             GObject.source_remove(self.progress_event_id)
         self.progress_event_id = GObject.timeout_add(time_step, self.progress_bar_do)
-    
+
     def progress_bar_do(self):
         time_step = 100
         if self.progress <= 1 and not self.paused and not self.duration == 0:
