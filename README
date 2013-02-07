@@ -11,3 +11,10 @@ Sometimes here...
 
 Then activate it and press the new Full Screen button
 apearing at Rhythmbox's top menu.
+
+## fork
+
+this is a fork from this repository:
+ - http://code.google.com/p/rhythmbox-fullscreen-plugin/source/list
+
+The intention is to correct the current issues that prevent a global installation & thus prevents a debian package from being created.
