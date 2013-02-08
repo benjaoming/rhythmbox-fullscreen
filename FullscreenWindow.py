@@ -26,7 +26,7 @@ class FullscreenWindow(Gtk.Window):
     def __init__(self, plugin):
         gs=GSetting()
         settings = gs.get_setting(gs.Path.PLUGIN)
-        fullscreen = settings[gs.PluginKey.USE_WINDOW]
+        fullscreen = settings[gs.PluginKey.USE_WINDOW] == False
         self.backend = plugin #FullscreenView instance
         Gtk.Window.__init__(self)
         self.connect("delete_event", self.delete_event)
