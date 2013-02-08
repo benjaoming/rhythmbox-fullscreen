@@ -9,6 +9,9 @@ from FullscreenWindow import *
 
 from os import path, listdir
 from urllib import url2pathname
+import rb
+
+from RhythmboxFullscreenPrefs import Preferences
 
 ui_str = \
 """<ui>
@@ -31,24 +34,19 @@ ALBUM_ART_W = 800
 ALBUM_ART_H = 800
 
 class FullscreenView (GObject.Object, Peas.Activatable):
-
+    __gtype_name = 'FullscreenPlugin'
     object = GObject.property(type=GObject.Object)
 
     def __init__(self):
         super(FullscreenView, self).__init__()
-        #self.settings = Gio.Settings("")
                 
-    def find_file(self, fname):
-        my_path = os.path.abspath(os.path.split(__file__)[0])
-        return os.path.join(my_path, fname)
-    
     def do_activate(self):
         shell = self.object
         data = {}
         self.shell = shell
         
         # Add "view-fullscreen" icon.
-        icon_file_name = self.find_file("view-fullscreen.svg")
+        icon_file_name = rb.find_plugin_file(self, "img/view-fullscreen.svg")
         iconsource = Gtk.IconSource()
         iconsource.set_filename(icon_file_name)
         iconset = Gtk.IconSet()
@@ -82,9 +80,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         uim.ensure_update()
 
     def show_fullscreen(self, event):
-        self.window = FullscreenWindow(fullscreen=True,
-                                       path=self.find_file("."),
-                                       backend=self)
+        self.window = FullscreenWindow(plugin=self)
         
         # Receive notification of song changes
         self.player = self.shell.props.shell_player

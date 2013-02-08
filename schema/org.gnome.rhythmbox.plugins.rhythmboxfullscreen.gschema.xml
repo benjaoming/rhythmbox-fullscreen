@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+    <schema path="/org/gnome/rhythmbox/plugins/rhythmboxfullscreen/" id="org.gnome.rhythmbox.plugins.rhythmboxfullscreen">
+        <key type="b" name="use-window">
+            <default>false</default>
+            <summary>Use a maximized window instead of fullscreen mode</summary>
+            <description>Use a maximized window instead of fullscreen mode</description>
+        </key>
+    </schema>
+</schemalist>

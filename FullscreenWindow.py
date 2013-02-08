@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-import sys
+import sys, rb
 
 from gi.repository import GObject, Gio, Gtk, Peas, RB, GLib, Gdk, GdkPixbuf
 
 from CairoWidgets import FullscreenEntryButton
+from RhythmboxFullscreenPrefs import GSetting
 
 _track1Bg = "#222"
 _track2Bg = "#111"
@@ -22,8 +23,11 @@ class FullscreenWindow(Gtk.Window):
     INFO_STATUS_PLAY  = "Resume playback"
     INFO_STATUS_SKIP  = "Skip to this track"
     
-    def __init__(self, fullscreen = True, path=".", backend=None):
-        self.backend = backend #FullscreenView instance
+    def __init__(self, plugin):
+        gs=GSetting()
+        settings = gs.get_setting(gs.Path.PLUGIN)
+        fullscreen = settings[gs.PluginKey.USE_WINDOW]
+        self.backend = plugin #FullscreenView instance
         Gtk.Window.__init__(self)
         self.connect("delete_event", self.delete_event)
         self.connect("key_press_event", self.key_press)
@@ -40,7 +44,7 @@ class FullscreenWindow(Gtk.Window):
         self.table.set_row_spacings(4)
         self.table.set_col_spacings(10)
 
-        self.no_artwork = GdkPixbuf.Pixbuf.new_from_file_at_size (path+"/rhythmbox-missing-artwork.svg",
+        self.no_artwork = GdkPixbuf.Pixbuf.new_from_file_at_size (rb.find_plugin_file(plugin, "img/rhythmbox-missing-artwork.svg"),
                                                                 _albumCoverWidth,
                                                                 _albumCoverHeight)
         self.album_widget = Gtk.Image()
@@ -85,6 +89,8 @@ class FullscreenWindow(Gtk.Window):
         self.show_all()
         if fullscreen:
             self.fullscreen()
+        else:
+            self.maximize()
 
     def destroy_track_widgets(self):
         for w in self.track_widgets:
