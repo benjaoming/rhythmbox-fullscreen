@@ -1,4 +1,21 @@
-# -*- coding: utf-8 -*-
+# -*- Mode: python; coding: utf-8; tab-width: 4; indent-tabs-mode: nil; -*-
+#
+# Copyright (C) 2013 - Benjamin Bach <benjamin@overtag.dk>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA.
+
 import mimetypes
 
 from gi.repository import GObject #@UnresolvedImport
@@ -98,7 +115,8 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         self.player.connect("playing-song-changed", self.reload_playlist)
         self.player.connect("playing-changed", self.reload_play_pause)
         
-        # TODO: This signal is not fired - which should we listen for? We should use the cover_db,
+        # TODO: This signal is not fired - which should we listen for?
+        # We should use the cover_db,
         # but what are its signals??
         cover_db = RB.ExtDB(name='album-art')
         self.player.connect("playing-song-property-changed", self.notify_metadata)
@@ -108,12 +126,14 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         self.reload_playlist(self.player, self.player.get_playing_entry())
 
     def playpause(self):
-        # Argument 'True' is unused (see http://developer.gnome.org/rhythmbox/2.98/RBShellPlayer.html#rb-shell-player-playpause)
+        # Argument 'True' is unused
+        #(see http://developer.gnome.org/rhythmbox/2.98/RBShellPlayer.html#rb-shell-player-playpause)
         self.player.playpause(True)
         
     def play_entry(self, index):
         if len(self.tracks) > index:
-            self.player.play_entry(self.tracks[index]["entry"], self.shell.get_property("library-source"))
+            self.player.play_entry(self.tracks[index]["entry"],
+                self.shell.get_property("library-source"))
 
     def reload_play_pause(self, player, playing):
         if not self.window.track_widgets:
@@ -205,7 +225,8 @@ class FullscreenView (GObject.Object, Peas.Activatable):
                     file_name = path.join(cover_dir, f)
                     mt = mimetypes.guess_type(file_name)[0]
                     if mt and mt.startswith('image/'):
-                        if True in map(lambda x: x in path.splitext(f)[0].lower(), ['cover', 'album', 'albumart', 'folder', 'front']):
+                        if True in map(lambda x: x in path.splitext(f)[0].lower(),
+                            ['cover', 'album', 'albumart', 'folder', 'front']):
                             return GdkPixbuf.Pixbuf.new_from_file_at_size (file_name, ALBUM_ART_W, ALBUM_ART_H)
 
             # Otherwise use what's found by the album art plugin

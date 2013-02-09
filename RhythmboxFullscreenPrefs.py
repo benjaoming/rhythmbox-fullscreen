@@ -1,7 +1,6 @@
 # -*- Mode: python; coding: utf-8; tab-width: 4; indent-tabs-mode: nil; -*-
 #
-# Copyright (C) 2012 - fossfreedom
-# Copyright (C) 2012 - Agustin Carrasco
+# Copyright (C) 2013 - Benjamin Bach <benjamin@overtag.dk>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA.
+
 from gi.repository import Gio
 from gi.repository import GObject
 from gi.repository import Gtk
@@ -30,7 +30,7 @@ GLIB_DIR="/usr/share/glib-2.0/schemas/"
 
 class GSetting:
     '''
-    This class manages the differentes settings that the plugins haves to
+    This class manages the different settings that the plugins has to
     access to read or write.
     '''
     # storage for the instance reference
@@ -112,7 +112,7 @@ class GSetting:
 
 class Preferences(GObject.Object, PeasGtk.Configurable):
     '''
-    Preferences for the CoverArt Browser Plugins. It holds the settings for
+    Preferences for the Fullscreen Plugin. It holds the settings for
     the plugin and also is the responsible of creating the preferences dialog.
     '''
     __gtype_name__ = 'FullscreenPreferences'
