@@ -100,7 +100,7 @@ class FullscreenWindow(Gtk.Window):
             w.destroy()
         self.track_widgets = []
 
-    def reload_track_widgets(self):
+    def reload_track_widgets(self, current_track=0):
         
         self.destroy_track_widgets()
         if self.vbox:
@@ -109,21 +109,21 @@ class FullscreenWindow(Gtk.Window):
         self.vbox.set_size_request(500,300)
 
         for i in range(self.track_count):
-            if i == 0:
-                t = FullscreenEntryButton( bg_color=_track1Bg,
-                                        width=500,
-                                        size1=24, size2=18,
-                                        has_progress_bar = True)
+            if i == current_track:
+                t = FullscreenEntryButton(bg_color=_track1Bg,
+                                          width=500,
+                                          size1=24, size2=18,
+                                          has_progress_bar = True)
                 #t.set_hover_icon(FullscreenEntryButton.HOVER_ICON_PAUSE)
                 self.track_infos.append(self.INFO_STATUS_PAUSE)
-            elif i == 1:
+            elif i == current_track+1:
                 t = FullscreenEntryButton( bg_color=_track2Bg,
-                                        width=500, size1=18, size2=14 )
+                                          width=500, size1=18, size2=14 )
                 self.track_infos.append(self.INFO_STATUS_SKIP)
                 #t.set_hover_icon(FullscreenEntryButton.HOVER_ICON_SKIP)
             else:
                 t = FullscreenEntryButton( bg_color=_track3Bg,
-                                        width=500, size1=14, size2=12 )
+                                          width=500, size1=14, size2=12 )
                 self.track_infos.append(self.INFO_STATUS_SKIP)
                 #t.set_hover_icon(FullscreenEntryButton.HOVER_ICON_SKIP)
             self.track_widgets.append(t)
@@ -198,9 +198,9 @@ class FullscreenWindow(Gtk.Window):
         
         
     # Renew queue
-    def set_tracks(self, tracks):
+    def set_tracks(self, tracks, current_track=0):
         self.track_count = len(tracks)
-        self.reload_track_widgets()
+        self.reload_track_widgets(current_track=current_track)
         i=0
         for w in self.track_widgets:
             if i<self.track_count:

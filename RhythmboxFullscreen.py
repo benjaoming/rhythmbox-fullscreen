@@ -133,7 +133,10 @@ class FullscreenView (GObject.Object, Peas.Activatable):
             self.window.track_infos[0] = FullscreenWindow.FullscreenWindow.INFO_STATUS_PLAY
 
     def get_entries(self, player, entry, cnt):
-        """Gets the next entries to be played from both active source and queue
+        """Gets the next and previous entries to be played from both active source and queue
+        
+        Next entries: Everything from source and queue
+        Previous entries: Everything just from the source
         
         Uses each source's query-model.
         player = player to use
@@ -143,23 +146,28 @@ class FullscreenView (GObject.Object, Peas.Activatable):
 
         if not entry:
             return []
-
+        
         entries = [entry]
         
-        queue = player.get_property("queue-source")
-        if queue:
-            querymodel = queue.get_property("query-model")
-            l = querymodel.get_next_from_entry(entry)
-            while l and len(entries) <= cnt:
-                entries.append(l)
-                l = querymodel.get_next_from_entry(l)
-        source = player.get_property("source")
-        if source:
-            querymodel = source.get_property("query-model")
-            l = querymodel.get_next_from_entry(entry)
-            while l and len(entries) <= cnt:
-                entries.append(l)
-                l = querymodel.get_next_from_entry(l)
+        def get_entries(property_name, backwards):
+            queue = player.get_property(property_name)
+            if queue:
+                querymodel = queue.get_property("query-model")
+                if not backwards:
+                    l = querymodel.get_next_from_entry(entry)
+                    while l and len(entries) <= cnt:
+                        entries.append(l)
+                        l = querymodel.get_next_from_entry(l)
+                else:
+                    l = querymodel.get_previous_from_entry(entry)
+                    while l and len(entries) <= cnt:
+                        entries.insert(0, l)
+                        l = querymodel.get_previous_from_entry(l)
+        
+        
+        get_entries("queue-source", False)
+        get_entries("source", True)
+        get_entries("source", False)
 
         return entries
 
@@ -211,6 +219,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
     
     def reload_playlist(self, player, entry):
 
+        entry = player.get_playing_entry()
         if not entry:
             # When there is no entry set for reload playlist, then what's happening?
             # Is everything fine and totally inactive?
@@ -219,13 +228,13 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         # Set cover art
         self.set_cover_art(entry)
         
-        entries = self.get_entries(player, entry, 20)
+        entries = self.get_entries(player, entry, 100)
         self.tracks = []
         
-        for entry in entries:
-            self.tracks.append(self.get_track_info(entry))
-        
-        self.window.set_tracks(self.tracks)
+        for e in entries:
+            self.tracks.append(self.get_track_info(e))
+
+        self.window.set_tracks(self.tracks, current_track=entries.index(entry))
         try:
             elapsed = player.get_playing_time()
         except:
