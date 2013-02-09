@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 import mimetypes
 
-from gi.repository import GObject, Gio, Gtk, Peas, RB, GLib, GdkPixbuf
-
-import os
-
-from FullscreenWindow import *
+from gi.repository import GObject #@UnresolvedImport
+from gi.repository import Gtk #@UnresolvedImport
+from gi.repository import Peas #@UnresolvedImport
+from gi.repository import RB #@UnresolvedImport
+from gi.repository import GdkPixbuf #@UnresolvedImport
 
 from os import path, listdir
 from urllib import url2pathname
-import rb
 
-from RhythmboxFullscreenPrefs import Preferences
+import FullscreenWindow
+
+from RhythmboxFullscreenPrefs import Preferences #@UnusedImport
 
 ui_str = \
 """<ui>
@@ -33,10 +34,20 @@ ui_str = \
 ALBUM_ART_W = 800
 ALBUM_ART_H = 800
 
+def find_plugin_file(filename):
+    """Since there were a couple of unresolved issues with rb.find_plugin_file,
+    we use our own little utility function"""
+    root_dir = path.abspath(path.split(path.split(__file__)[0]))
+    path_to_file= path.join(root_dir, filename)
+    if path.exists(path_to_file):
+        return path_to_file
+    return None
+
+
 class FullscreenView (GObject.Object, Peas.Activatable):
     __gtype_name = 'FullscreenPlugin'
-    object = GObject.property(type=GObject.Object)
-
+    object = GObject.property(type=GObject.Object) #@ReservedAssignment
+    
     def __init__(self):
         super(FullscreenView, self).__init__()
                 
@@ -46,7 +57,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         self.shell = shell
         
         # Add "view-fullscreen" icon.
-        icon_file_name = rb.find_plugin_file(self, "img/view-fullscreen.svg")
+        icon_file_name = find_plugin_file("img/view-fullscreen.svg")
         iconsource = Gtk.IconSource()
         iconsource.set_filename(icon_file_name)
         iconset = Gtk.IconSet()
@@ -68,7 +79,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         uim.insert_action_group(data['action_group'], 0)
         data['ui_id'] = uim.add_ui_from_string(ui_str)
         uim.ensure_update()
-
+        
         shell.set_data('FullscreenPluginInfo', data)
 
     def do_deactivate(self):
@@ -80,13 +91,13 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         uim.ensure_update()
 
     def show_fullscreen(self, event):
-        self.window = FullscreenWindow(plugin=self)
+        self.window = FullscreenWindow.FullscreenWindow(plugin=self)
         
         # Receive notification of song changes
         self.player = self.shell.props.shell_player
         self.player.connect("playing-song-changed", self.reload_playlist)
         self.player.connect("playing-changed", self.reload_play_pause)
-
+        
         # TODO: This signal is not fired - which should we listen for? We should use the cover_db,
         # but what are its signals??
         cover_db = RB.ExtDB(name='album-art')
@@ -115,11 +126,11 @@ class FullscreenView (GObject.Object, Peas.Activatable):
             self.window.track_widgets[0].paused=False
             self.window.track_widgets[0].start_progress_bar(elapsed)
             self.window.current_info = "Now playing..."
-            self.window.track_infos[0] = FullscreenWindow.INFO_STATUS_PAUSE
+            self.window.track_infos[0] = FullscreenWindow.FullscreenWindow.INFO_STATUS_PAUSE
         else:
             self.window.track_widgets[0].paused=True
-            self.window.current_info = FullscreenWindow.INFO_STATUS_IDLE
-            self.window.track_infos[0] = FullscreenWindow.INFO_STATUS_PLAY
+            self.window.current_info = FullscreenWindow.FullscreenWindow.INFO_STATUS_IDLE
+            self.window.track_infos[0] = FullscreenWindow.FullscreenWindow.INFO_STATUS_PLAY
 
     def get_entries(self, player, entry, cnt):
         """Gets the next entries to be played from both active source and queue
@@ -225,6 +236,6 @@ class FullscreenView (GObject.Object, Peas.Activatable):
             self.window.current_info = "Now playing..." # TODO
         else:
             self.window.track_widgets[0].set_elapsed(elapsed)
-            self.window.current_info = FullscreenWindow.INFO_STATUS_IDLE
+            self.window.current_info = FullscreenWindow.FullscreenWindow.INFO_STATUS_IDLE
         
         self.window.show_info()

@@ -21,8 +21,12 @@ from gi.repository import GObject
 from gi.repository import Gtk
 from gi.repository import PeasGtk
 from gi.repository import RB
+import os
 
 import rb
+
+SCHEMA_PATH = 'org.gnome.rhythmbox.plugins.rhythmboxfullscreen'
+GLIB_DIR="/usr/share/glib-2.0/schemas/"
 
 class GSetting:
     '''
@@ -37,14 +41,23 @@ class GSetting:
         # below public variables and methods that can be called for GSetting
         def __init__(self):
             '''
-            Initializes the singleton interface, asigning all the constants
+            Initializes the singleton interface, assigning all the constants
             used to access the plugin's settings.
             '''
-            self.Path = self._enum(
-                PLUGIN='org.gnome.rhythmbox.plugins.rhythmboxfullscreen')
+            source = Gio.SettingsSchemaSource.get_default()
+            if not source.lookup(SCHEMA_PATH, True):
+                from RhythmboxFullscreen import find_plugin_file
+                print "Trying to run a gksudo to get the schema installed"
+                os.system(
+                    'gksudo --message "Rhythmbox Fullscreen view needs to install a glib xml schema for saving preferences. Please type in your admin password. Afterwards, restart Rhythmbox." cp "%s" "%s"' % (
+                        find_plugin_file("schema/org.gnome.rhythmbox.plugins.rhythmboxfullscreen.gschema.xml"), GLIB_DIR)
+                )
+                os.system('gksudo --message "Compiling new glib schemas" glib-compile-schemas "%s"' % GLIB_DIR)
+                raise Exception("No glib xml schema installed")
+            
+            self.Path = self._enum(PLUGIN=SCHEMA_PATH)
 
-            self.PluginKey = self._enum(
-                USE_WINDOW='use-window')
+            self.PluginKey = self._enum(USE_WINDOW='use-window')
 
             self.setting = {}
 
@@ -103,8 +116,8 @@ class Preferences(GObject.Object, PeasGtk.Configurable):
     the plugin and also is the responsible of creating the preferences dialog.
     '''
     __gtype_name__ = 'FullscreenPreferences'
-    object = GObject.property(type=GObject.Object)
-
+    object = GObject.property(type=GObject.Object) #@ReservedAssignment
+    
     def __init__(self):
         '''
         Initialises the preferences, getting an instance of the settings saved
@@ -120,8 +133,8 @@ class Preferences(GObject.Object, PeasGtk.Configurable):
         '''
         # create the ui
         builder = Gtk.Builder()
-        builder.add_from_file(rb.find_plugin_file(self,
-            'ui/rhythmbox_fullscreen_prefs.ui'))
+        from RhythmboxFullscreen import find_plugin_file
+        builder.add_from_file(find_plugin_file('ui/rhythmbox_fullscreen_prefs.ui'))
         builder.connect_signals(self)
 
         gs = GSetting()

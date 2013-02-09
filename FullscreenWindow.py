@@ -24,9 +24,11 @@ class FullscreenWindow(Gtk.Window):
     INFO_STATUS_SKIP  = "Skip to this track"
     
     def __init__(self, plugin):
+        
         gs=GSetting()
         settings = gs.get_setting(gs.Path.PLUGIN)
         fullscreen = settings[gs.PluginKey.USE_WINDOW] == False
+        
         self.backend = plugin #FullscreenView instance
         Gtk.Window.__init__(self)
         self.connect("delete_event", self.delete_event)
@@ -43,8 +45,9 @@ class FullscreenWindow(Gtk.Window):
         self.table = Gtk.Table(3,3)
         self.table.set_row_spacings(4)
         self.table.set_col_spacings(10)
-
-        self.no_artwork = GdkPixbuf.Pixbuf.new_from_file_at_size (rb.find_plugin_file(plugin, "img/rhythmbox-missing-artwork.svg"),
+        
+        from RhythmboxFullscreen import find_plugin_file
+        self.no_artwork = GdkPixbuf.Pixbuf.new_from_file_at_size (find_plugin_file("img/rhythmbox-missing-artwork.svg"),
                                                                 _albumCoverWidth,
                                                                 _albumCoverHeight)
         self.album_widget = Gtk.Image()
