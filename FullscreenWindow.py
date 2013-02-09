@@ -67,7 +67,9 @@ class FullscreenWindow(Gtk.Window):
         self.track_layout.set_events( Gdk.EventMask.LEAVE_NOTIFY_MASK
                                       | Gdk.EventMask.POINTER_MOTION_MASK )
         self.track_layout.connect("motion_notify_event", self.track_layout_scroll)
-
+        
+        self.current_track = 0
+        
         self.scroll_event_id = None
         self.scroll_y = 0
         
@@ -149,7 +151,7 @@ class FullscreenWindow(Gtk.Window):
         if self.scroll_event_id:
             GObject.source_remove(self.scroll_event_id)
         index = self.track_widgets.index(widget)
-        if index==0:
+        if index==self.current_track:
             self.backend.playpause()
             self.show_info(self.track_infos[index])
         else:
