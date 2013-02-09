@@ -122,13 +122,13 @@ class FullscreenView (GObject.Object, Peas.Activatable):
             try:
                 elapsed = player.get_playing_time()
             except:
-                elapsed = (0,0)
-            self.window.track_widgets[0].paused=False
-            self.window.track_widgets[0].start_progress_bar(elapsed)
+                elapsed = (True, 0.0)
+            self.window.track_widgets[self.window.current_track].paused=False
+            self.window.track_widgets[self.window.current_track].start_progress_bar(elapsed)
             self.window.current_info = "Now playing..."
             self.window.track_infos[0] = FullscreenWindow.FullscreenWindow.INFO_STATUS_PAUSE
         else:
-            self.window.track_widgets[0].paused=True
+            self.window.track_widgets[self.window.current_track].paused=True
             self.window.current_info = FullscreenWindow.FullscreenWindow.INFO_STATUS_IDLE
             self.window.track_infos[0] = FullscreenWindow.FullscreenWindow.INFO_STATUS_PLAY
 
@@ -172,10 +172,9 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         return entries
 
     def get_track_info(self, entry):
-        db = self.shell.props.db
-        artist = entry.get_string(RB.RhythmDBPropType.ARTIST).replace('&', '&amp;')
-        album = entry.get_string(RB.RhythmDBPropType.ALBUM).replace('&', '&amp;')
-        title = entry.get_string(RB.RhythmDBPropType.TITLE).replace('&', '&amp;')
+        artist = entry.get_string(RB.RhythmDBPropType.ARTIST)#.replace('&', '&amp;')
+        album = entry.get_string(RB.RhythmDBPropType.ALBUM)#.replace('&', '&amp;')
+        title = entry.get_string(RB.RhythmDBPropType.TITLE)#.replace('&', '&amp;')
         duration = entry.get_ulong(RB.RhythmDBPropType.DURATION)
         track = {"artist":artist,
                  "album":album,

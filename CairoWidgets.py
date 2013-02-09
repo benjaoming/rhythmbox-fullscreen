@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-import time
-
-from gi.repository import GObject, Gio, Gtk, Peas, RB, GLib, Gdk, cairo, PangoCairo
+from gi.repository import GObject #@UnresolvedImport
+from gi.repository import Gtk #@UnresolvedImport
+from gi.repository import Gdk #@UnresolvedImport
+from gi.repository import PangoCairo #@UnresolvedImport
 
 from math import pi
 from cgi import escape
@@ -118,14 +119,14 @@ class FullscreenEntryButton(RoundedButtonPangoCairoWidget):
     def set_elapsed(self, elapsed=(False, 0.0)):
         elapsed = elapsed[1]
         if not elapsed==0.0:
-            self.progress = (elapsed[1]*1.0)/self.duration
+            self.progress = (elapsed*1.0)/self.duration
         else:
             self.progress = 0.0
 
     def start_progress_bar(self, elapsed=(False, 0.0)):
         elapsed = elapsed[1]
         if not elapsed==0.0:
-            self.progress = (elapsed[1]*1.0)/self.duration
+            self.progress = (elapsed*1.0)/self.duration
         else:
             self.progress = 0.0
         self.progress_bar_do()

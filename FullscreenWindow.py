@@ -102,6 +102,8 @@ class FullscreenWindow(Gtk.Window):
 
     def reload_track_widgets(self, current_track=0):
         
+        self.current_track = current_track
+        
         self.destroy_track_widgets()
         if self.vbox:
             self.vbox.destroy()
