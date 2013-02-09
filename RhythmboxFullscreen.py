@@ -37,7 +37,7 @@ ALBUM_ART_H = 800
 def find_plugin_file(filename):
     """Since there were a couple of unresolved issues with rb.find_plugin_file,
     we use our own little utility function"""
-    root_dir = path.abspath(path.split(path.split(__file__)[0]))
+    root_dir = path.abspath(path.split(__file__)[0])
     path_to_file= path.join(root_dir, filename)
     if path.exists(path_to_file):
         return path_to_file
