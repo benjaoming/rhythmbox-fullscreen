@@ -118,14 +118,14 @@ class FullscreenEntryButton(RoundedButtonPangoCairoWidget):
     def set_elapsed(self, elapsed=(False, 0.0)):
         elapsed = elapsed[1]
         if not elapsed==0.0:
-            self.progress = (elapsed*1.0)/self.duration
+            self.progress = (elapsed[1]*1.0)/self.duration
         else:
             self.progress = 0.0
 
     def start_progress_bar(self, elapsed=(False, 0.0)):
         elapsed = elapsed[1]
         if not elapsed==0.0:
-            self.progress = (elapsed*1.0)/self.duration
+            self.progress = (elapsed[1]*1.0)/self.duration
         else:
             self.progress = 0.0
         self.progress_bar_do()
