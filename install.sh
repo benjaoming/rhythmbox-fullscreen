@@ -78,6 +78,17 @@ else
 echo "Installing plugin globally"
     PLUGIN_PATH="/usr/lib/rhythmbox/plugins/RhythmboxFullscreen/"
     DATA_PATH="/usr/share/rhythmbox/plugins/RhythmboxFullscreen/"
+
+    if [ ! -d $PLUGIN_PATH ]
+    then
+        echo "Plugin path not found: $PLUGIN_PATH"
+        exit 1
+    fi
+    if [ ! -d $DATA_PATH ]
+    then
+        echo "Data path not found: $DATA_PATH"
+        exit 1
+    fi
     
     #build the dirs
     sudo mkdir -p $PLUGIN_PATH
