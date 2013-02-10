@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-import sys, rb
+from gi.repository import GObject #@UnresolvedImport
+from gi.repository import Gtk #@UnresolvedImport
+from gi.repository import Gdk #@UnresolvedImport
+from gi.repository import GdkPixbuf #@UnresolvedImport
 
-from gi.repository import GObject, Gio, Gtk, Peas, RB, GLib, Gdk, GdkPixbuf
+import rb #@UnresolvedImport
 
 from CairoWidgets import FullscreenEntryButton
 from RhythmboxFullscreenPrefs import GSetting
@@ -46,10 +49,11 @@ class FullscreenWindow(Gtk.Window):
         self.table.set_row_spacings(4)
         self.table.set_col_spacings(10)
         
-        from RhythmboxFullscreen import find_plugin_file
-        self.no_artwork = GdkPixbuf.Pixbuf.new_from_file_at_size (find_plugin_file("img/rhythmbox-missing-artwork.svg"),
-                                                                _albumCoverWidth,
-                                                                _albumCoverHeight)
+        self.no_artwork = GdkPixbuf.Pixbuf.new_from_file_at_size(
+            rb.find_plugin_file(self.backend, "img/rhythmbox-missing-artwork.svg"),
+            _albumCoverWidth,
+            _albumCoverHeight
+        )
         self.album_widget = Gtk.Image()
         self.set_artwork()
         

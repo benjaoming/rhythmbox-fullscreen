@@ -16,14 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA.
-from gi.repository import Gio
-from gi.repository import GObject
-from gi.repository import Gtk
-from gi.repository import PeasGtk
-from gi.repository import RB
+
+from gi.repository import Gio #@UnresolvedImport
+from gi.repository import GObject #@UnresolvedImport
+from gi.repository import Gtk #@UnresolvedImport
+from gi.repository import PeasGtk #@UnresolvedImport
+
 import os
 
-import rb
+import rb #@UnresolvedImport
 
 SCHEMA_PATH = 'org.gnome.rhythmbox.plugins.rhythmboxfullscreen'
 GLIB_DIR="/usr/share/glib-2.0/schemas/"
@@ -46,11 +47,10 @@ class GSetting:
             '''
             source = Gio.SettingsSchemaSource.get_default()
             if not source.lookup(SCHEMA_PATH, True):
-                from RhythmboxFullscreen import find_plugin_file
                 print "Trying to run a gksudo to get the schema installed"
                 os.system(
                     'gksudo --message "Rhythmbox Fullscreen view needs to install a glib xml schema for saving preferences. Please type in your admin password. Afterwards, restart Rhythmbox." cp "%s" "%s"' % (
-                        find_plugin_file("schema/org.gnome.rhythmbox.plugins.rhythmboxfullscreen.gschema.xml"), GLIB_DIR)
+                        rb.find_plugin_file(self, "schema/org.gnome.rhythmbox.plugins.rhythmboxfullscreen.gschema.xml"), GLIB_DIR)
                 )
                 os.system('gksudo --message "Compiling new glib schemas" glib-compile-schemas "%s"' % GLIB_DIR)
                 raise Exception("No glib xml schema installed")
@@ -133,8 +133,9 @@ class Preferences(GObject.Object, PeasGtk.Configurable):
         '''
         # create the ui
         builder = Gtk.Builder()
-        from RhythmboxFullscreen import find_plugin_file
-        builder.add_from_file(find_plugin_file('ui/rhythmbox_fullscreen_prefs.ui'))
+        builder.add_from_file(
+            rb.find_plugin_file(self, 'ui/rhythmbox_fullscreen_prefs.ui')
+        )
         builder.connect_signals(self)
 
         gs = GSetting()
