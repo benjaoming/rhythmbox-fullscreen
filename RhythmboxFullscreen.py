@@ -74,17 +74,17 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         self.shell = shell
         
         # Add "view-fullscreen" icon.
-        icon_file_name = find_plugin_file("img/view-fullscreen.svg")
-        iconsource = Gtk.IconSource()
-        iconsource.set_filename(icon_file_name)
-        iconset = Gtk.IconSet()
-        iconset.add_source(iconsource)
+        #icon_file_name = find_plugin_file("img/view-fullscreen.svg")
+        #iconsource = Gtk.IconSource()
+        #iconsource.set_filename(icon_file_name)
+        #iconset = Gtk.IconSet()
+        #iconset.add_source(iconsource)
         iconfactory = Gtk.IconFactory()
-        iconfactory.add("view-fullscreen", iconset)
+        #iconfactory.add("view-fullscreen", iconset)
         iconfactory.add_default()
         action = Gtk.Action("ToggleFullscreen", "Full Screen",
                             "Full Screen Mode",
-                            "view-fullscreen");
+                            "gtk-fullscreen");
         
         # Connect a handler for pressing the button
         action.connect("activate", self.show_fullscreen)
