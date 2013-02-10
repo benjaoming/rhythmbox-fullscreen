@@ -124,6 +124,7 @@ class FullscreenWindow(Gtk.Window):
     def destroy_track_widgets(self):
         for w in self.track_widgets:
             w.destroy()
+        self.track_widget_heights = []
         self.track_widgets = []
 
     def reload_track_widgets(self, current_track=0):
@@ -163,6 +164,7 @@ class FullscreenWindow(Gtk.Window):
         self.scroll_y = 0
         self.track_layout.put(self.vbox,0,0)
         self.track_layout.show_all()
+        GObject.idle_add(self.scroll_to_current)
 
     def track_hover_on(self, widget, event):
         index = self.track_widgets.index(widget)
@@ -184,7 +186,8 @@ class FullscreenWindow(Gtk.Window):
     def track_layout_scroll_stop(self, widget, event):
         if self.scroll_event_id:
             GObject.source_remove(self.scroll_event_id)
-        
+            self.scroll_event_id = None
+    
     def track_layout_scroll(self, widget, event):
         time_step = 5 #msecs
         ycoord = event.y
@@ -206,7 +209,9 @@ class FullscreenWindow(Gtk.Window):
         
         if not accel == 0.0:
             self.scroll_event_id = GObject.timeout_add(time_step, self.do_scrolling, accel)
-    
+        else:
+            self.scroll_event_id = GObject.timeout_add(10*1000, self.scroll_to_current)
+            
     def do_scrolling(self, accel):
         step = int(1*accel)
         if step == 0:
@@ -222,9 +227,49 @@ class FullscreenWindow(Gtk.Window):
             self.scroll_y += step
         
         self.track_layout.move(self.vbox, 0, -self.scroll_y)
-        return self.scroll_y > 0 and self.scroll_y < scroll_height
         
+        continue_scrolling = self.scroll_y > 0 and self.scroll_y < scroll_height
+        if not continue_scrolling:
+            self.scroll_event_id = GObject.timeout_add(10*1000, self.scroll_to_current)
         
+        return continue_scrolling
+
+        
+    
+    def scroll_to_current(self):
+        if self.scroll_event_id:
+            GObject.source_remove(self.scroll_event_id)
+            self.scroll_event_id = None
+
+        try:
+            current_widget = self.track_widgets[self.current_track]
+        except IndexError:
+            return False
+        
+        allocation = current_widget.get_allocation()
+        
+        time_step = 2 #msecs    
+        
+        if allocation.y > self.scroll_y:
+            self.scrollto_direction = 1
+        else:
+            self.scrollto_direction = -1
+        
+        self.scrollto_step_size = 3
+
+        self.scrollto_steps = abs((self.scroll_y - allocation.y) // self.scrollto_step_size)
+        
+        self.scroll_event_id = GObject.timeout_add(
+            time_step, 
+            self.do_scroll_to, 
+        )
+    
+    def do_scroll_to(self):
+        self.scroll_y += self.scrollto_step_size * self.scrollto_direction
+        self.track_layout.move(self.vbox, 0, -self.scroll_y)
+        self.scrollto_steps -= 1
+        return self.scrollto_steps > 0
+    
     # Renew queue
     def set_tracks(self, tracks, current_track=0):
         self.track_count = len(tracks)

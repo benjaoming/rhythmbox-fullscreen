@@ -29,7 +29,6 @@ class RoundedButtonPangoCairoWidget(Gtk.DrawingArea):
 
     def __init__ (self, upper=9, text=''):
         Gtk.DrawingArea.__init__(self)
-        self.set_size_request (200, 200)
         self.connect('draw', self.do_draw_cb)
 
     # Handle the expose-event by drawing
@@ -277,7 +276,9 @@ class FullscreenEntryButton(RoundedButtonPangoCairoWidget):
             w = self.width
         if self.height == -1:
             h = text_height+20
+            self.height = h
         else:
             h = self.height
+        
         self.set_size_request(w,h)
 
