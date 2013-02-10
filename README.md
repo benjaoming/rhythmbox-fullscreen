@@ -44,3 +44,7 @@ The plugin uses custom drawn Cairo widgets in a DrawableArea and idle callbacks 
 if you find an error, please run Rhythmbox from terminal with the following option:
 
     rhythmbox -D RhythmboxFullscreen
+
+### Credits
+
+Thanks to [fossfreedom](https://github.com/fossfreedom/) for restructuring the plugin, packaging for Debian and tracking down bugs.
