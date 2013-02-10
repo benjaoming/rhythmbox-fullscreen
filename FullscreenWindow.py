@@ -1,4 +1,21 @@
-# -*- coding: utf-8 -*-
+# -*- Mode: python; coding: utf-8; tab-width: 4; indent-tabs-mode: nil; -*-
+#
+# Copyright (C) 2013 - Benjamin Bach <benjamin@overtag.dk>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA.
+
 from gi.repository import GObject #@UnresolvedImport
 from gi.repository import Gtk #@UnresolvedImport
 from gi.repository import Gdk #@UnresolvedImport
@@ -40,7 +57,8 @@ class FullscreenWindow(Gtk.Window):
         self.modify_bg(Gtk.StateFlags.NORMAL,Gdk.Color(0,0,0))
         try:
             icon_theme = Gtk.icon_theme_get_default()
-            self.set_icon(icon_theme.load_icon("view-fullscreen", Gtk.ICON_SIZE_DIALOG, Gtk.ICON_LOOKUP_FORCE_SVG))
+            self.set_icon(icon_theme.load_icon("view-fullscreen",
+                Gtk.ICON_SIZE_DIALOG, Gtk.ICON_LOOKUP_FORCE_SVG))
         except:
             pass
         self.set_title("Rhythmbox Fullscreen View")
@@ -54,6 +72,7 @@ class FullscreenWindow(Gtk.Window):
             _albumCoverWidth,
             _albumCoverHeight
         )
+
         self.album_widget = Gtk.Image()
         self.set_artwork()
         
@@ -88,7 +107,8 @@ class FullscreenWindow(Gtk.Window):
         self.table.attach(self.track_layout,1,2,0,1)
         self.table.attach(self.info_label,0,2,2,4)
         self.table2 = Gtk.Table(1,1)
-        self.table2.attach(self.table,0,1,0,1,xoptions=Gtk.AttachOptions.EXPAND,yoptions=Gtk.AttachOptions.EXPAND)
+        self.table2.attach(self.table,0,1,0,1,
+            xoptions=Gtk.AttachOptions.EXPAND,yoptions=Gtk.AttachOptions.EXPAND)
         
         self.add(self.table2)
 
