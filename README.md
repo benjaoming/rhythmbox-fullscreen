@@ -1,7 +1,6 @@
-
 #Rhythmbox Fullscreen Plugin
 
-![fullscreen](http://i.imgur.com/lPhkbdu.png)
+![fullscreen](http://i216.photobucket.com/albums/cc33/benjaoming/Screenshotfrom2013-02-10195009_zps3f50706d.png)
 
 ###What does it do?
 
