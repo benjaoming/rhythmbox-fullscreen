@@ -253,18 +253,21 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         
         for e in entries:
             self.tracks.append(self.get_track_info(e))
+        
+        current_track_index = entries.index(entry)
+        
+        self.window.set_tracks(self.tracks, current_track=current_track_index)
 
-        self.window.set_tracks(self.tracks, current_track=entries.index(entry))
         try:
             elapsed = player.get_playing_time()
         except:
-            elapsed = (0.0, 0.0)
-
+            elapsed = (True, 0.0)
+        
         if player.get_playing():
-            self.window.track_widgets[0].start_progress_bar(elapsed)
+            self.window.track_widgets[current_track_index].start_progress_bar(elapsed)
             self.window.current_info = "Now playing..." # TODO
         else:
-            self.window.track_widgets[0].set_elapsed(elapsed)
+            self.window.track_widgets[current_track_index].set_elapsed(elapsed)
             self.window.current_info = FullscreenWindow.FullscreenWindow.INFO_STATUS_IDLE
         
         self.window.show_info()
