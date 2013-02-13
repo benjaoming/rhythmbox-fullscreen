@@ -62,7 +62,9 @@ class FullscreenWindow(Gtk.Window):
         except:
             pass
         self.set_title("Rhythmbox Fullscreen View")
-
+        self.set_events( Gdk.EventMask.ENTER_NOTIFY_MASK)        
+        self.connect('enter-notify-event', self.track_layout_scroll_stop)        
+        
         self.table = Gtk.Table(3,3)
         self.table.set_row_spacings(4)
         self.table.set_col_spacings(10)
@@ -87,9 +89,8 @@ class FullscreenWindow(Gtk.Window):
         self.track_layout.set_size(500,300)
         self.track_layout.set_size_request(500,300)
         self.track_layout.modify_bg(Gtk.StateFlags.NORMAL, Gdk.Color(0,0,0))
-        self.track_layout.set_events( Gdk.EventMask.LEAVE_NOTIFY_MASK
-                                      | Gdk.EventMask.POINTER_MOTION_MASK )
-        self.track_layout.connect("motion_notify_event", self.track_layout_scroll)
+        self.track_layout.set_events( Gdk.EventMask.POINTER_MOTION_MASK )
+        self.track_layout.connect('motion_notify_event', self.track_layout_scroll)
         
         self.current_track = 0
         
