@@ -60,6 +60,23 @@ def find_plugin_file(filename):
         return path_to_file
     return None
 
+class FullscreenTrack():
+    
+    def __init__(self, artist=None, title=None, album=None, duration=0.0, entry=None):
+        self.artist = artist
+        self.title = title
+        self.album = album
+        self.duration = duration
+        self.entry = entry
+    
+    def __eq__(self, obj):
+        # Do not compare RB entry object because it changes
+        return (
+            self.artist == obj.artist and
+            self.title == obj.title and
+            self.album == obj.album and
+            self.duration == obj.duration
+        )
 
 class FullscreenView (GObject.Object, Peas.Activatable):
     __gtype_name = 'FullscreenPlugin'
@@ -112,7 +129,8 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         
         # Receive notification of song changes
         self.player = self.shell.props.shell_player
-        self.player.connect("playing-song-changed", self.reload_playlist)
+        self.player.connect("playing-source-changed", self.reload_playlist)
+        self.player.connect("playing-song-changed", self.on_playing_song_changed)
         self.player.connect("playing-changed", self.reload_play_pause)
         
         # TODO: This signal is not fired - which should we listen for?
@@ -132,7 +150,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         
     def play_entry(self, index):
         if len(self.tracks) > index:
-            self.player.play_entry(self.tracks[index]["entry"],
+            self.player.play_entry(self.tracks[index].entry,
                 self.shell.get_property("library-source"))
 
     def reload_play_pause(self, player, playing):
@@ -196,11 +214,13 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         album = entry.get_string(RB.RhythmDBPropType.ALBUM)#.replace('&', '&amp;')
         title = entry.get_string(RB.RhythmDBPropType.TITLE)#.replace('&', '&amp;')
         duration = entry.get_ulong(RB.RhythmDBPropType.DURATION)
-        track = {"artist":artist,
-                 "album":album,
-                 "title":title,
-                 "duration":duration,
-                 "entry":entry}
+        track = FullscreenTrack(
+            artist=artist,
+            album = album,
+            title = title,
+            duration = duration,
+            entry = entry
+        )
         return track
     
     def notify_metadata(self, player, uri, prop, *args, **kwargs):
@@ -248,15 +268,18 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         # Set cover art
         self.set_cover_art(entry)
         
-        entries = self.get_entries(player, entry, 100)
+        self.entries = self.get_entries(player, entry, 100)
         self.tracks = []
         
-        for e in entries:
+        for e in self.entries:
             self.tracks.append(self.get_track_info(e))
         
-        current_track_index = entries.index(entry)
+        current_track_index = self.entries.index(entry)
         
         self.window.set_tracks(self.tracks, current_track=current_track_index)
+        self.set_active_track_properties(player, entry, current_track_index)
+
+    def set_active_track_properties(self, player, entry, current_track_index):
 
         try:
             elapsed = player.get_playing_time()
@@ -271,3 +294,24 @@ class FullscreenView (GObject.Object, Peas.Activatable):
             self.window.current_info = FullscreenWindow.FullscreenWindow.INFO_STATUS_IDLE
         
         self.window.show_info()
+    
+    def on_playing_song_changed(self, player, entry):
+        
+        if not self.entries:
+            return self.reload_playlist(player, entry)
+        
+        entry = player.get_playing_entry()
+        if not entry:
+            # When there is no entry set for reload playlist, then what's happening?
+            # Is everything fine and totally inactive?
+            return
+        
+        try:
+            current_track_index = self.tracks.index(self.get_track_info(entry))
+        except ValueError:
+            return self.reload_playlist(player, entry)
+        
+        self.window.change_playing_track(current_track_index)
+
+        self.set_active_track_properties(player, entry, current_track_index)
+    

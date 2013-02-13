@@ -99,7 +99,7 @@ class FullscreenWindow(Gtk.Window):
         # Number of tracks to display
         self.track_count = 0
         # Remember track widget points in array
-        self.vbox = None
+        self.track_table = None
         self.track_widgets = []
         self.reload_track_widgets()
 
@@ -126,49 +126,94 @@ class FullscreenWindow(Gtk.Window):
             w.destroy()
         self.track_widget_heights = []
         self.track_widgets = []
+    
+    def change_playing_track(self, current_track=0):
+        if not self.track_widgets:
+            return self.reload_track_widgets(current_track=current_track)
+        old_track = self.current_track
+        self.current_track = current_track
+        self.track_table.remove(self.track_widgets[old_track])
+        self.track_table.remove(self.track_widgets[current_track])
+        self.track_widgets[old_track].destroy()
+        self.track_widgets[current_track].destroy()
+        
+        current_widget = self.get_track_widget(active=True)
+        old_widget = self.get_track_widget(active=False)
+        
+        self.track_widgets[current_track] = current_widget
+        self.track_widgets[old_track] = old_widget
 
+        t=self.tracks[current_track]
+        current_widget.set_track(t.artist,t.album,t.title,t.duration)
+        t=self.tracks[old_track]
+        old_widget.set_track(t.artist,t.album,t.title,t.duration)
+
+        self.track_table.attach_defaults(
+            current_widget,
+            0,1,current_track,current_track+1
+        )
+        self.track_table.attach_defaults(
+            old_widget,
+            0,1,old_track,old_track+1
+        )
+        self.track_table.show_all()
+    
     def reload_track_widgets(self, current_track=0):
         
         self.current_track = current_track
         
         self.destroy_track_widgets()
-        if self.vbox:
-            self.vbox.destroy()
-        self.vbox = Gtk.VBox(spacing=4)
-        self.vbox.set_size_request(500,300)
+        if self.track_table:
+            self.track_table.destroy()
+        self.track_table = Gtk.Table(self.track_count, 1)
+        self.track_table.set_row_spacings(4)
+        self.track_table.set_size_request(495,300)
 
         for i in range(self.track_count):
+            w = self.get_track_widget(active=(i == current_track))
             if i == current_track:
-                t = FullscreenEntryButton(bg_color=_track1Bg,
-                                          width=500,
-                                          size1=24, size2=18,
-                                          has_progress_bar = True)
-                #t.set_hover_icon(FullscreenEntryButton.HOVER_ICON_PAUSE)
                 self.track_infos.append(self.INFO_STATUS_PAUSE)
-            elif i == current_track+1:
-                t = FullscreenEntryButton( bg_color=_track2Bg,
-                                          width=500, size1=18, size2=14 )
-                self.track_infos.append(self.INFO_STATUS_SKIP)
-                #t.set_hover_icon(FullscreenEntryButton.HOVER_ICON_SKIP)
             else:
-                t = FullscreenEntryButton( bg_color=_track3Bg,
-                                          width=500, size1=14, size2=12 )
-                self.track_infos.append(self.INFO_STATUS_SKIP)
-                #t.set_hover_icon(FullscreenEntryButton.HOVER_ICON_SKIP)
-            self.track_widgets.append(t)
-            self.vbox.pack_start(t, False, False, 0)
-            t.connect("button_press_event", self.track_click)
-            t.connect("enter_notify_event", self.track_hover_on)
-            t.connect("leave_notify_event", self.track_hover_out)
+                self.track_infos.append(self.INFO_STATUS_PAUSE)
+            self.track_widgets.append(w)
+            self.track_table.attach_defaults(w, 0, 1, i, i+1)
 
         self.scroll_y = 0
-        self.track_layout.put(self.vbox,0,0)
+        self.track_layout.put(self.track_table,0,0)
         self.track_layout.show_all()
+        for i,w in enumerate(self.track_widgets):
+            if i<self.track_count:
+                t=self.tracks[i]
+                w.set_track(t.artist,t.album,t.title,t.duration)
+                w.queue_draw()
+            else:
+                w.set_track("","","",0)
+                w.queue_draw()
+            i+=1
         GObject.idle_add(self.scroll_to_current)
-
+    
+    def get_track_widget(self, active=False):
+        if active:
+            w = FullscreenEntryButton(
+                bg_color=_track1Bg,
+                width=500, size1=24, size2=18,
+                has_progress_bar = True)
+            #w.set_hover_icon(FullscreenEntryButton.HOVER_ICON_PAUSE)
+        else:
+            w = FullscreenEntryButton( bg_color=_track2Bg,
+                                      width=500, size1=18, size2=14 )
+            #w.set_hover_icon(FullscreenEntryButton.HOVER_ICON_SKIP)
+        w.connect("button_press_event", self.track_click)
+        w.connect("enter_notify_event", self.track_hover_on)
+        w.connect("leave_notify_event", self.track_hover_out)
+        return w
+    
     def track_hover_on(self, widget, event):
-        index = self.track_widgets.index(widget)
-        self.show_info(self.track_infos[index])
+        try:
+            index = self.track_widgets.index(widget)
+            self.show_info(self.track_infos[index])
+        except ValueError:
+            pass
 
     def track_hover_out(self, widget, event):
         self.show_info(self.current_info)
@@ -216,9 +261,9 @@ class FullscreenWindow(Gtk.Window):
         step = int(1*accel)
         if step == 0:
             return
-        vbox_size = self.vbox.size_request()
+        track_table_size = self.track_table.size_request()
         layout_size = self.track_layout.get_size()
-        scroll_height = vbox_size.height - layout_size[1]
+        scroll_height = track_table_size.height - layout_size[1]
         if self.scroll_y + step < 0:
             self.scroll_y = 0
         elif self.scroll_y + step > scroll_height:
@@ -226,7 +271,7 @@ class FullscreenWindow(Gtk.Window):
         else:
             self.scroll_y += step
         
-        self.track_layout.move(self.vbox, 0, -self.scroll_y)
+        self.track_layout.move(self.track_table, 0, -self.scroll_y)
         
         continue_scrolling = self.scroll_y > 0 and self.scroll_y < scroll_height
         if not continue_scrolling:
@@ -266,24 +311,15 @@ class FullscreenWindow(Gtk.Window):
     
     def do_scroll_to(self):
         self.scroll_y += self.scrollto_step_size * self.scrollto_direction
-        self.track_layout.move(self.vbox, 0, -self.scroll_y)
+        self.track_layout.move(self.track_table, 0, -self.scroll_y)
         self.scrollto_steps -= 1
         return self.scrollto_steps > 0
     
     # Renew queue
     def set_tracks(self, tracks, current_track=0):
         self.track_count = len(tracks)
+        self.tracks = tracks
         self.reload_track_widgets(current_track=current_track)
-        i=0
-        for w in self.track_widgets:
-            if i<self.track_count:
-                t=tracks[i]
-                w.set_track(t["artist"],t["album"],t["title"],t["duration"])
-                w.queue_draw()
-            else:
-                w.set_track("","","",0)
-                w.queue_draw()
-            i+=1
         
     def show_info(self, str_info=None):
         if not str_info:
