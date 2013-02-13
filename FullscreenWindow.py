@@ -166,6 +166,8 @@ class FullscreenWindow(Gtk.Window):
         self.destroy_track_widgets()
         if self.track_table:
             self.track_table.destroy()
+        if self.track_count == 0:
+            return
         self.track_table = Gtk.Table(self.track_count, 1)
         self.track_table.set_row_spacings(4)
         self.track_table.set_size_request(495,300)
