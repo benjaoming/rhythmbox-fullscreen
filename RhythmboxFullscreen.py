@@ -31,6 +31,10 @@ import FullscreenWindow
 
 from RhythmboxFullscreenPrefs import Preferences #@UnusedImport
 
+from fullscreen_rb3compat import ActionGroup
+from fullscreen_rb3compat import Action
+from fullscreen_rb3compat import ApplicationShell
+
 ui_str = \
 """<ui>
   <menubar name="MenuBar">
@@ -40,11 +44,6 @@ ui_str = \
       </placeholder>
     </menu>
   </menubar>
-  <toolbar name="ToolBar">
-    <placeholder name="ToolBarPluginPlaceholder">
-      <toolitem name="Fullscreen" action="ToggleFullscreen"/>
-    </placeholder>
-  </toolbar>
 </ui>"""
 
 # Scales the prefetched album art for later use
@@ -89,42 +88,22 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         shell = self.object
         data = {}
         self.shell = shell
-        
-        # Add "view-fullscreen" icon.
-        #icon_file_name = find_plugin_file("img/view-fullscreen.svg")
-        #iconsource = Gtk.IconSource()
-        #iconsource.set_filename(icon_file_name)
-        #iconset = Gtk.IconSet()
-        #iconset.add_source(iconsource)
-        iconfactory = Gtk.IconFactory()
-        #iconfactory.add("view-fullscreen", iconset)
-        iconfactory.add_default()
-        action = Gtk.Action("ToggleFullscreen", "Full Screen",
-                            "Full Screen Mode",
-                            "gtk-fullscreen");
-        
-        # Connect a handler for pressing the button
-        action.connect("activate", self.show_fullscreen)
-        
-        data['action_group'] = Gtk.ActionGroup('FullscreenPluginActions')
-        data['action_group'].add_action(action)
-        
-        uim = shell.props.ui_manager
-        uim.insert_action_group(data['action_group'], 0)
-        data['ui_id'] = uim.add_ui_from_string(ui_str)
-        uim.ensure_update()
-        
-        shell.set_data('FullscreenPluginInfo', data)
+        self.entries = None
 
+        self.action_group = ActionGroup(self.shell, 'FullscreenPluginActions')
+        action = self.action_group.add_action(func=self.show_fullscreen,
+            action_name='ToggleFullscreen', label='Full Screen',
+            action_type='app')
+
+        self._appshell = ApplicationShell(self.shell)
+        self._appshell.insert_action_group(self.action_group)
+        self._appshell.add_app_menuitems(ui_str, 'FullscreenPluginActions', 'view')
+        
     def do_deactivate(self):
         shell = self.object
-        data = shell.get_data('FullscreenPluginInfo')
-        uim = shell.props.ui_manager
-        uim.remove_ui(data['ui_id'])
-        uim.remove_action_group(data['action_group'])
-        uim.ensure_update()
+        self._appshell.cleanup()
 
-    def show_fullscreen(self, event):
+    def show_fullscreen(self, *args):
         self.window = FullscreenWindow.FullscreenWindow(plugin=self)
         
         # Receive notification of song changes
