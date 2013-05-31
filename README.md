@@ -17,6 +17,13 @@ This python plugin gives you a stylish full screen window usable for parties etc
 Then activate it and press the new Full Screen button
 appearing at Rhythmbox's toolbar.
 
+###Ubuntu package
+
+Fossfreedom is maintaining a PPA on Launchpad with the latest release.
+Click the link below to read instructions about adding PPA.
+
+[ppa:fossfreedom/rhythmbox-plugins](https://launchpad.net/~fossfreedom/+archive/rhythmbox-plugins)
+
 ###Local-User installation:
 
 <pre>
@@ -36,6 +43,12 @@ cd rhythmbox-fullscreen
 ###Known issues
 
 Reports say that using Compiz on a 64-bit Virtualbox will trouble the progress bars and scrolling. However, using windowed mode (via the plugin preferences) should fix this. 
+
+###Usage
+
+ - Activate the plugin.
+ - To enter full screen mode, find the menu item **View->Full Screen**.
+ - ...or simply hit **F12**
 
 ###Technical stuff
 
