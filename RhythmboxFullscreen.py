@@ -93,7 +93,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         self.action_group = ActionGroup(self.shell, 'FullscreenPluginActions')
         action = self.action_group.add_action(func=self.show_fullscreen,
             action_name='ToggleFullscreen', label='Full Screen',
-            action_type='app')
+            action_type='app', accel="F12")
 
         self._appshell = ApplicationShell(self.shell)
         self._appshell.insert_action_group(self.action_group)
