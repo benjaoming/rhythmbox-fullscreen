@@ -88,7 +88,7 @@ function.'''
 
 class FullscreenEntryButton(RoundedButtonPangoCairoWidget):
     
-    HOVER_ICON_PLAY, HOVER_ICON_PAUSE, HOVER_ICON_SKIP = range(3)
+    HOVER_ICON_PLAY, HOVER_ICON_PAUSE, HOVER_ICON_SKIP = list(range(3))
     
     def __init__(self, 
                  bg_color=(0.1, 0.1, 0.1, 1.0), 
@@ -220,7 +220,7 @@ class FullscreenEntryButton(RoundedButtonPangoCairoWidget):
             
             self.draw_rounded_rectangle(cr, 3, 3, (width-15)*self.progress, height-6, 4)
             ligten_factor = 1.5
-            progress_bar_color = map(lambda x: x*ligten_factor, self.bg_color[:3]) + [1.0]
+            progress_bar_color = [x*ligten_factor for x in self.bg_color[:3]] + [1.0]
             cr.set_source_rgba(*progress_bar_color)
             cr.fill()
 

@@ -29,16 +29,40 @@ Click the link below to read instructions about adding PPA.
 <pre>
 git clone https://github.com/benjaoming/rhythmbox-fullscreen
 cd rhythmbox-fullscreen
+</pre>
+
+For rhythmbox versions 2.96 to 2.99.1
+
+<pre>
 ./install.sh
 </pre>
+
+For rhythmbox version 3.0.1 and later
+
+<pre>
+./install.sh --rb3
+</pre>
+
 
 ###Global-User (all-users) installation:
 
 <pre>
 git clone https://github.com/benjaoming/rhythmbox-fullscreen
 cd rhythmbox-fullscreen
+</pre>
+
+For rhythmbox versions 2.96 to 2.99.1
+
+<pre>
 ./install.sh -g
 </pre>
+
+For rhythmbox version 3.0.1 and later
+
+<pre>
+./install.sh -g --rb3
+</pre>
+
 
 ###Known issues
 

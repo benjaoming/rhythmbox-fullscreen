@@ -45,7 +45,7 @@ class GSetting:
             '''
             source = Gio.SettingsSchemaSource.get_default()
             if not source.lookup(SCHEMA_PATH, True):
-                print "Trying to run a gksudo to get the schema installed"
+                print("Trying to run a gksudo to get the schema installed")
                 os.system(
                     'gksudo --message "Rhythmbox Fullscreen view needs to install a glib xml schema for saving preferences. Please type in your admin password. Afterwards, restart Rhythmbox." cp "%s" "%s"' % (
                         rb.find_plugin_file(self, "schema/org.gnome.rhythmbox.plugins.rhythmboxfullscreen.gschema.xml"), GLIB_DIR)

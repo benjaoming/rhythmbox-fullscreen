@@ -8,6 +8,9 @@ $0 [OPTION]
 -h, --help show this message.
 -l, --local install the plugin locally (default).
 -g, --global install the plugin globally.
+-2, --rb2     install the plugin for rhythmbox version 2.96 to 2.99 (default).
+-3, --rb3       install the plugin for rhythmbox 3
+
 
 EOF
 )
@@ -15,7 +18,7 @@ EOF
 ########################### OPTIONS PARSING #################################
 
 #parse options
-TMP=`getopt --name=$0 -a --longoptions=local,global,help -o l,g,h -- $@`
+TMP=`getopt --name=$0 -a --longoptions=local,global,rb2,rb3,help -o l,g,2,3,h -- $@`
 
 if [[ $? == 1 ]]
 then
@@ -34,6 +37,12 @@ case $1 in
         -g|--global)
             LOCAL=false
             ;;
+        -2|--rb2)
+            RB=true
+            ;;
+        -3|--rb3)
+            RB=false
+            ;;
         -h|--help)
             echo "$usage"
             exit
@@ -45,6 +54,7 @@ shift # remove the '--', now $1 positioned at first argument if any
 
 #default values
 LOCAL=${LOCAL:=true}
+RB=${RB:=true}
 
 ########################## START INSTALLATION ################################
 
@@ -70,6 +80,12 @@ then
 
     #copy the files
     cp -r "${SCRIPT_PATH}"* "$PLUGIN_PATH"
+    
+    #install the plugin; the install path depends on the install mode
+    if [[ $RB == false ]]
+    then
+        mv "$PLUGIN_PATH"RhythmboxFullscreen.plugin3 "$PLUGIN_PATH"RhythmboxFullscreen.plugin
+    fi
 
     #remove the install script from the dir (not needed)
     rm "${PLUGIN_PATH}${SCRIPT_NAME}"
@@ -85,8 +101,13 @@ echo "Installing plugin globally"
     
     #copy the files
     sudo cp "${SCRIPT_PATH}"*.py "$PLUGIN_PATH"
-    sudo cp "${SCRIPT_PATH}"*.plugin "$PLUGIN_PATH"
-
+    if [[ $RB == false ]]
+    then
+        sudo cp "${SCRIPT_PATH}"RhythmboxFullscreen.plugin3 "$PLUGIN_PATH"RhythmboxFullscreen.plugin
+    else
+        sudo cp "${SCRIPT_PATH}"*.plugin "$PLUGIN_PATH"
+    fi
+    
     sudo cp -r "${SCRIPT_PATH}"ui "$DATA_PATH"
     sudo cp -r "${SCRIPT_PATH}"img "$DATA_PATH"
 fi

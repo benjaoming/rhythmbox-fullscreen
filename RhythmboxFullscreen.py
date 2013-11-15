@@ -25,7 +25,7 @@ from gi.repository import RB #@UnresolvedImport
 from gi.repository import GdkPixbuf #@UnresolvedImport
 
 from os import path, listdir
-from urllib import url2pathname
+from fullscreen_rb3compat import url2pathname
 
 import FullscreenWindow
 
@@ -224,8 +224,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
                     file_name = path.join(cover_dir, f)
                     mt = mimetypes.guess_type(file_name)[0]
                     if mt and mt.startswith('image/'):
-                        if True in map(lambda x: x in path.splitext(f)[0].lower(),
-                            ['cover', 'album', 'albumart', 'folder', 'front']):
+                        if True in [x in path.splitext(f)[0].lower() for x in ['cover', 'album', 'albumart', 'folder', 'front']]:
                             return GdkPixbuf.Pixbuf.new_from_file_at_size (file_name, ALBUM_ART_W, ALBUM_ART_H)
 
             # Otherwise use what's found by the album art plugin
