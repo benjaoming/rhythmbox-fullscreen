@@ -32,15 +32,14 @@ _track1Fg = "#FFF"
 _track2Fg = "#888"
 _track3Fg = "#666"
 
-_albumCoverHeight = 300  # pixels
-_albumCoverWidth = 300  # pixels
-
-
 class FullscreenWindow(Gtk.Window):
     INFO_STATUS_IDLE = "Player idle"
     INFO_STATUS_PAUSE = "Pause playing track"
     INFO_STATUS_PLAY = "Resume playback"
     INFO_STATUS_SKIP = "Skip to this track"
+
+    _albumCoverHeight = 300  # pixels
+    _albumCoverWidth = 300  # pixels
 
     def __init__(self, plugin):
 
@@ -53,6 +52,23 @@ class FullscreenWindow(Gtk.Window):
         self.connect("delete_event", self.delete_event)
         self.connect("key_press_event", self.key_press)
         self.set_border_width(100)
+
+
+        w = self
+        s = w.get_screen()
+        # Using the screen of the Window, the monitor it's on can be identified
+        m = s.get_monitor_at_window(s.get_active_window())
+        # Then get the geometry of that monitor
+        monitor = s.get_monitor_geometry(m)
+        # This is an example output
+        print("Heigh: %s, Width: %s" % (monitor.height, monitor.width))
+        if monitor.height < monitor.width:
+            self._albumCoverHeight = monitor.height / 2
+            self._albumCoverWidth = monitor.height / 2
+        else:
+            self._albumCoverHeight = monitor.width / 2
+            self._albumCoverWidth = monitor.width / 2
+
         self.modify_bg(Gtk.StateFlags.NORMAL, Gdk.Color(0, 0, 0))
         try:
             icon_theme = Gtk.icon_theme_get_default()
@@ -70,8 +86,8 @@ class FullscreenWindow(Gtk.Window):
 
         self.no_artwork = GdkPixbuf.Pixbuf.new_from_file_at_size(
             rb.find_plugin_file(self.backend, "img/rhythmbox-missing-artwork.svg"),
-            _albumCoverWidth,
-            _albumCoverHeight
+            self._albumCoverWidth,
+            self._albumCoverHeight
         )
 
         self.album_widget = Gtk.Image()
@@ -85,8 +101,8 @@ class FullscreenWindow(Gtk.Window):
 
         # Layout containing vbox with tracks
         self.track_layout = Gtk.Layout()
-        self.track_layout.set_size(500, 300)
-        self.track_layout.set_size_request(500, 300)
+        self.track_layout.set_size(self._albumCoverWidth + 200, self._albumCoverHeight)
+        self.track_layout.set_size_request(self._albumCoverWidth + 200, self._albumCoverHeight)
         self.track_layout.modify_bg(Gtk.StateFlags.NORMAL, Gdk.Color(0, 0, 0))
         self.track_layout.set_events(Gdk.EventMask.POINTER_MOTION_MASK)
         self.track_layout.connect('motion_notify_event', self.track_layout_scroll)
@@ -169,7 +185,7 @@ class FullscreenWindow(Gtk.Window):
             return
         self.track_table = Gtk.Table(self.track_count, 1)
         self.track_table.set_row_spacings(4)
-        self.track_table.set_size_request(495, 300)
+        self.track_table.set_size_request(self._albumCoverWidth + 195, self._albumCoverHeight)
 
         for i in range(self.track_count):
             w = self.get_track_widget(active=(i == current_track))
@@ -198,12 +214,12 @@ class FullscreenWindow(Gtk.Window):
         if active:
             w = FullscreenEntryButton(
                 bg_color=_track1Bg,
-                width=500, size1=24, size2=18,
+                width=self._albumCoverWidth + 200, size1=24, size2=18,
                 has_progress_bar=True)
             # w.set_hover_icon(FullscreenEntryButton.HOVER_ICON_PAUSE)
         else:
             w = FullscreenEntryButton(bg_color=_track2Bg,
-                                      width=500, size1=18, size2=14)
+                                      width=self._albumCoverWidth + 200, size1=18, size2=14)
             # w.set_hover_icon(FullscreenEntryButton.HOVER_ICON_SKIP)
         w.connect("button_press_event", self.track_click)
         w.connect("enter_notify_event", self.track_hover_on)
@@ -340,8 +356,8 @@ class FullscreenWindow(Gtk.Window):
             if h == 0 or w == 0:
                 self.albumPixbuf = self.no_artwork
             else:
-                scaled_w = w / (h / float(_albumCoverHeight)) if h > w else _albumCoverWidth
-                scaled_h = h / (w / float(_albumCoverWidth)) if w > h else _albumCoverHeight
+                scaled_w = w / (h / float(self._albumCoverHeight)) if h > w else self._albumCoverWidth
+                scaled_h = h / (w / float(self._albumCoverWidth)) if w > h else self._albumCoverHeight
                 pixbuf = pixbuf.scale_simple(int(scaled_w), int(scaled_h),
                                              GdkPixbuf.InterpType.BILINEAR)
                 self.albumPixbuf = pixbuf

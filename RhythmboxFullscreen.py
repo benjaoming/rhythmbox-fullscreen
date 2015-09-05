@@ -40,10 +40,6 @@ ui_str = \
       </menubar>
     </ui>"""
 
-# Scales the prefetched album art for later use
-ALBUM_ART_W = 800
-ALBUM_ART_H = 800
-
 
 def find_plugin_file(filename):
     """Since there were a couple of unresolved issues with rb.find_plugin_file,
@@ -77,6 +73,10 @@ class FullscreenView(GObject.Object, Peas.Activatable):
     __gtype_name = 'FullscreenPlugin'
     object = GObject.property(type=GObject.Object)  # @ReservedAssignment
 
+    # Scales the prefetched album art for later use
+    ALBUM_ART_W = 800
+    ALBUM_ART_H = 800
+
     def __init__(self):
         super(FullscreenView, self).__init__()
 
@@ -85,6 +85,21 @@ class FullscreenView(GObject.Object, Peas.Activatable):
         data = {}
         self.shell = shell
         self.entries = None
+
+        w = self.shell.props.window
+        s = w.get_screen()
+        # Using the screen of the Window, the monitor it's on can be identified
+        m = s.get_monitor_at_window(s.get_active_window())
+        # Then get the geometry of that monitor
+        monitor = s.get_monitor_geometry(m)
+        # This is an example output
+        print("Heigh: %s, Width: %s" % (monitor.height, monitor.width))
+        if monitor.height < monitor.width:
+            self.ALBUM_ART_H = monitor.height
+            self.ALBUM_ART_W = monitor.height
+        else:
+            self.ALBUM_ART_H = monitor.width
+            self.ALBUM_ART_W = monitor.width
 
         self.action_group = ActionGroup(self.shell, 'FullscreenPluginActions')
         action = self.action_group.add_action(func=self.show_fullscreen,
@@ -221,7 +236,7 @@ class FullscreenView(GObject.Object, Peas.Activatable):
                     if mt and mt.startswith('image/'):
                         if True in [x in path.splitext(f)[0].lower() for x in
                                     ['cover', 'album', 'albumart', 'folder', 'front']]:
-                            return GdkPixbuf.Pixbuf.new_from_file_at_size(file_name, ALBUM_ART_W, ALBUM_ART_H)
+                            return GdkPixbuf.Pixbuf.new_from_file_at_size(file_name, self.ALBUM_ART_W, self.ALBUM_ART_H)
 
             # Otherwise use what's found by the album art plugin
             key = entry.create_ext_db_key(RB.RhythmDBPropType.ALBUM)
@@ -232,7 +247,7 @@ class FullscreenView(GObject.Object, Peas.Activatable):
                 art_location = art_location[0]
 
             if art_location and path.exists(art_location):
-                return GdkPixbuf.Pixbuf.new_from_file_at_size(art_location, ALBUM_ART_W, ALBUM_ART_H)
+                return GdkPixbuf.Pixbuf.new_from_file_at_size(art_location, self.ALBUM_ART_W, self.ALBUM_ART_H)
 
     def reload_playlist(self, player, entry):
 
