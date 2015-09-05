@@ -8,8 +8,8 @@ $0 [OPTION]
 -h, --help show this message.
 -l, --local install the plugin locally (default).
 -g, --global install the plugin globally.
--2, --rb2     install the plugin for rhythmbox version 2.96 to 2.99 (default).
--3, --rb3       install the plugin for rhythmbox 3
+-2, --rb2     install the plugin for rhythmbox version 2.96 to 2.99.
+-3, --rb3       install the plugin for rhythmbox 3 (default)
 
 
 EOF
@@ -54,7 +54,7 @@ shift # remove the '--', now $1 positioned at first argument if any
 
 #default values
 LOCAL=${LOCAL:=true}
-RB=${RB:=true}
+RB=${RB:=false}
 
 ########################## START INSTALLATION ################################
 

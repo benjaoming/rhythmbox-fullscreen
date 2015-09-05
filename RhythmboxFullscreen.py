@@ -17,57 +17,52 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA.
 
 import mimetypes
-
-from gi.repository import GObject #@UnresolvedImport
-from gi.repository import Gtk #@UnresolvedImport
-from gi.repository import Peas #@UnresolvedImport
-from gi.repository import RB #@UnresolvedImport
-from gi.repository import GdkPixbuf #@UnresolvedImport
-
 from os import path, listdir
+
+from gi.repository import GObject  # @UnresolvedImport
+from gi.repository import Peas  # @UnresolvedImport
+from gi.repository import RB  # @UnresolvedImport
+from gi.repository import GdkPixbuf  # @UnresolvedImport
+
 from fullscreen_rb3compat import url2pathname
-
 import FullscreenWindow
-
-from RhythmboxFullscreenPrefs import Preferences #@UnusedImport
-
 from fullscreen_rb3compat import ActionGroup
-from fullscreen_rb3compat import Action
 from fullscreen_rb3compat import ApplicationShell
 
 ui_str = \
-"""<ui>
-  <menubar name="MenuBar">
-    <menu name="ViewMenu" action="View">
-      <placeholder name="ViewMenuModePlaceholder">
-        <menuitem name="ViewMenuToggleFullscreen" action="ToggleFullscreen"/>
-      </placeholder>
-    </menu>
-  </menubar>
-</ui>"""
+    """<ui>
+      <menubar name="MenuBar">
+        <menu name="ViewMenu" action="View">
+          <placeholder name="ViewMenuModePlaceholder">
+            <menuitem name="ViewMenuToggleFullscreen" action="ToggleFullscreen"/>
+          </placeholder>
+        </menu>
+      </menubar>
+    </ui>"""
 
 # Scales the prefetched album art for later use
 ALBUM_ART_W = 800
 ALBUM_ART_H = 800
 
+
 def find_plugin_file(filename):
     """Since there were a couple of unresolved issues with rb.find_plugin_file,
     we use our own little utility function"""
     root_dir = path.abspath(path.split(__file__)[0])
-    path_to_file= path.join(root_dir, filename)
+    path_to_file = path.join(root_dir, filename)
     if path.exists(path_to_file):
         return path_to_file
     return None
 
+
 class FullscreenTrack():
-    
     def __init__(self, artist=None, title=None, album=None, duration=0.0, entry=None):
         self.artist = artist
         self.title = title
         self.album = album
         self.duration = duration
         self.entry = entry
-    
+
     def __eq__(self, obj):
         # Do not compare RB entry object because it changes
         return (
@@ -77,13 +72,14 @@ class FullscreenTrack():
             self.duration == obj.duration
         )
 
-class FullscreenView (GObject.Object, Peas.Activatable):
+
+class FullscreenView(GObject.Object, Peas.Activatable):
     __gtype_name = 'FullscreenPlugin'
-    object = GObject.property(type=GObject.Object) #@ReservedAssignment
-    
+    object = GObject.property(type=GObject.Object)  # @ReservedAssignment
+
     def __init__(self):
         super(FullscreenView, self).__init__()
-                
+
     def do_activate(self):
         shell = self.object
         data = {}
@@ -92,26 +88,26 @@ class FullscreenView (GObject.Object, Peas.Activatable):
 
         self.action_group = ActionGroup(self.shell, 'FullscreenPluginActions')
         action = self.action_group.add_action(func=self.show_fullscreen,
-            action_name='ToggleFullscreen', label='Full Screen',
-            action_type='app', accel="F12")
+                                              action_name='ToggleFullscreen', label='Full Screen',
+                                              action_type='app', accel="F12")
 
         self._appshell = ApplicationShell(self.shell)
         self._appshell.insert_action_group(self.action_group)
         self._appshell.add_app_menuitems(ui_str, 'FullscreenPluginActions', 'view')
-        
+
     def do_deactivate(self):
         shell = self.object
         self._appshell.cleanup()
 
     def show_fullscreen(self, *args):
         self.window = FullscreenWindow.FullscreenWindow(plugin=self)
-        
+
         # Receive notification of song changes
         self.player = self.shell.props.shell_player
         self.player.connect("playing-source-changed", self.reload_playlist)
         self.player.connect("playing-song-changed", self.on_playing_song_changed)
         self.player.connect("playing-changed", self.reload_play_pause)
-        
+
         # TODO: This signal is not fired - which should we listen for?
         # We should use the cover_db,
         # but what are its signals??
@@ -124,13 +120,13 @@ class FullscreenView (GObject.Object, Peas.Activatable):
 
     def playpause(self):
         # Argument 'True' is unused
-        #(see http://developer.gnome.org/rhythmbox/2.98/RBShellPlayer.html#rb-shell-player-playpause)
+        # (see http://developer.gnome.org/rhythmbox/2.98/RBShellPlayer.html#rb-shell-player-playpause)
         self.player.playpause(True)
-        
+
     def play_entry(self, index):
         if len(self.tracks) > index:
             self.player.play_entry(self.tracks[index].entry,
-                self.shell.get_property("library-source"))
+                                   self.shell.get_property("library-source"))
 
     def reload_play_pause(self, player, playing):
         if not self.window.track_widgets:
@@ -140,12 +136,12 @@ class FullscreenView (GObject.Object, Peas.Activatable):
                 elapsed = player.get_playing_time()
             except:
                 elapsed = (True, 0.0)
-            self.window.track_widgets[self.window.current_track].paused=False
+            self.window.track_widgets[self.window.current_track].paused = False
             self.window.track_widgets[self.window.current_track].start_progress_bar(elapsed)
             self.window.current_info = "Now playing..."
             self.window.track_infos[0] = FullscreenWindow.FullscreenWindow.INFO_STATUS_PAUSE
         else:
-            self.window.track_widgets[self.window.current_track].paused=True
+            self.window.track_widgets[self.window.current_track].paused = True
             self.window.current_info = FullscreenWindow.FullscreenWindow.INFO_STATUS_IDLE
             self.window.track_infos[0] = FullscreenWindow.FullscreenWindow.INFO_STATUS_PLAY
 
@@ -163,9 +159,9 @@ class FullscreenView (GObject.Object, Peas.Activatable):
 
         if not entry:
             return []
-        
+
         entries = [entry]
-        
+
         def get_entries(property_name, backwards):
             queue = player.get_property(property_name)
             if queue:
@@ -180,8 +176,7 @@ class FullscreenView (GObject.Object, Peas.Activatable):
                     while l and len(entries) <= cnt:
                         entries.insert(0, l)
                         l = querymodel.get_previous_from_entry(l)
-        
-        
+
         get_entries("queue-source", False)
         get_entries("source", True)
         get_entries("source", False)
@@ -189,33 +184,33 @@ class FullscreenView (GObject.Object, Peas.Activatable):
         return entries
 
     def get_track_info(self, entry):
-        artist = entry.get_string(RB.RhythmDBPropType.ARTIST)#.replace('&', '&amp;')
-        album = entry.get_string(RB.RhythmDBPropType.ALBUM)#.replace('&', '&amp;')
-        title = entry.get_string(RB.RhythmDBPropType.TITLE)#.replace('&', '&amp;')
+        artist = entry.get_string(RB.RhythmDBPropType.ARTIST)  # .replace('&', '&amp;')
+        album = entry.get_string(RB.RhythmDBPropType.ALBUM)  # .replace('&', '&amp;')
+        title = entry.get_string(RB.RhythmDBPropType.TITLE)  # .replace('&', '&amp;')
         duration = entry.get_ulong(RB.RhythmDBPropType.DURATION)
         track = FullscreenTrack(
             artist=artist,
-            album = album,
-            title = title,
-            duration = duration,
-            entry = entry
+            album=album,
+            title=title,
+            duration=duration,
+            entry=entry
         )
         return track
-    
+
     def notify_metadata(self, player, uri, prop, *args, **kwargs):
         """Subscribe to metadata changes from database"""
         self.set_cover_art(player.get_playing_entry())
-    
+
     def notify_cover_art_change(self, *args):
         self.set_cover_art(self.shell.props.shell_player.get_playing_entry())
-    
+
     def set_cover_art(self, entry):
         if entry:
             self.window.set_artwork(self.get_cover(entry))
 
     def get_cover(self, entry):
         if entry:
-            
+
             # Try to find an album cover in the folder of the currently playing track
             cover_dir = path.dirname(url2pathname(entry.get_playback_uri()).replace('file://', ''))
             # TODO: use os.walk()
@@ -224,17 +219,18 @@ class FullscreenView (GObject.Object, Peas.Activatable):
                     file_name = path.join(cover_dir, f)
                     mt = mimetypes.guess_type(file_name)[0]
                     if mt and mt.startswith('image/'):
-                        if True in [x in path.splitext(f)[0].lower() for x in ['cover', 'album', 'albumart', 'folder', 'front']]:
-                            return GdkPixbuf.Pixbuf.new_from_file_at_size (file_name, ALBUM_ART_W, ALBUM_ART_H)
+                        if True in [x in path.splitext(f)[0].lower() for x in
+                                    ['cover', 'album', 'albumart', 'folder', 'front']]:
+                            return GdkPixbuf.Pixbuf.new_from_file_at_size(file_name, ALBUM_ART_W, ALBUM_ART_H)
 
             # Otherwise use what's found by the album art plugin
             key = entry.create_ext_db_key(RB.RhythmDBPropType.ALBUM)
             cover_db = RB.ExtDB(name='album-art')
             art_location = cover_db.lookup(key)
-            
+
             if art_location and path.exists(art_location):
-                return GdkPixbuf.Pixbuf.new_from_file_at_size (art_location, ALBUM_ART_W, ALBUM_ART_H)
-    
+                return GdkPixbuf.Pixbuf.new_from_file_at_size(art_location, ALBUM_ART_W, ALBUM_ART_H)
+
     def reload_playlist(self, player, entry):
 
         entry = player.get_playing_entry()
@@ -242,18 +238,18 @@ class FullscreenView (GObject.Object, Peas.Activatable):
             # When there is no entry set for reload playlist, then what's happening?
             # Is everything fine and totally inactive?
             return
-        
+
         # Set cover art
         self.set_cover_art(entry)
-        
+
         self.entries = self.get_entries(player, entry, 100)
         self.tracks = []
-        
+
         for e in self.entries:
             self.tracks.append(self.get_track_info(e))
-        
+
         current_track_index = self.entries.index(entry)
-        
+
         self.window.set_tracks(self.tracks, current_track=current_track_index)
         self.set_active_track_properties(player, entry, current_track_index)
 
@@ -263,33 +259,32 @@ class FullscreenView (GObject.Object, Peas.Activatable):
             elapsed = player.get_playing_time()
         except:
             elapsed = (True, 0.0)
-        
+
         if player.get_playing():
             self.window.track_widgets[current_track_index].start_progress_bar(elapsed)
-            self.window.current_info = "Now playing..." # TODO
+            self.window.current_info = "Now playing..."  # TODO
         else:
             self.window.track_widgets[current_track_index].set_elapsed(elapsed)
             self.window.current_info = FullscreenWindow.FullscreenWindow.INFO_STATUS_IDLE
-        
+
         self.window.show_info()
-    
+
     def on_playing_song_changed(self, player, entry):
-        
+
         if not self.entries:
             return self.reload_playlist(player, entry)
-        
+
         entry = player.get_playing_entry()
         if not entry:
             # When there is no entry set for reload playlist, then what's happening?
             # Is everything fine and totally inactive?
             return
-        
+
         try:
             current_track_index = self.tracks.index(self.get_track_info(entry))
         except ValueError:
             return self.reload_playlist(player, entry)
-        
+
         self.window.change_playing_track(current_track_index)
 
         self.set_active_track_properties(player, entry, current_track_index)
-    

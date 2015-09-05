@@ -16,16 +16,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA.
 
-from gi.repository import Gio #@UnresolvedImport
-from gi.repository import GObject #@UnresolvedImport
-from gi.repository import Gtk #@UnresolvedImport
-from gi.repository import PeasGtk #@UnresolvedImport
-
 import os
-import rb #@UnresolvedImport
+
+from gi.repository import Gio  # @UnresolvedImport
+from gi.repository import GObject  # @UnresolvedImport
+from gi.repository import Gtk  # @UnresolvedImport
+from gi.repository import PeasGtk  # @UnresolvedImport
+
+import rb  # @UnresolvedImport
 
 SCHEMA_PATH = 'org.gnome.rhythmbox.plugins.rhythmboxfullscreen'
-GLIB_DIR="/usr/share/glib-2.0/schemas/"
+GLIB_DIR = "/usr/share/glib-2.0/schemas/"
+
 
 class GSetting:
     '''
@@ -48,11 +50,12 @@ class GSetting:
                 print("Trying to run a gksudo to get the schema installed")
                 os.system(
                     'gksudo --message "Rhythmbox Fullscreen view needs to install a glib xml schema for saving preferences. Please type in your admin password. Afterwards, restart Rhythmbox." cp "%s" "%s"' % (
-                        rb.find_plugin_file(self, "schema/org.gnome.rhythmbox.plugins.rhythmboxfullscreen.gschema.xml"), GLIB_DIR)
+                        rb.find_plugin_file(self, "schema/org.gnome.rhythmbox.plugins.rhythmboxfullscreen.gschema.xml"),
+                        GLIB_DIR)
                 )
                 os.system('gksudo --message "Compiling new glib schemas" glib-compile-schemas "%s"' % GLIB_DIR)
                 raise Exception("No glib xml schema installed")
-            
+
             self.Path = self._enum(PLUGIN=SCHEMA_PATH)
 
             self.PluginKey = self._enum(USE_WINDOW='use-window')
@@ -114,8 +117,8 @@ class Preferences(GObject.Object, PeasGtk.Configurable):
     the plugin and also is the responsible of creating the preferences dialog.
     '''
     __gtype_name__ = 'FullscreenPreferences'
-    object = GObject.property(type=GObject.Object) #@ReservedAssignment
-    
+    object = GObject.property(type=GObject.Object)  # @ReservedAssignment
+
     def __init__(self):
         '''
         Initialises the preferences, getting an instance of the settings saved
@@ -140,7 +143,7 @@ class Preferences(GObject.Object, PeasGtk.Configurable):
         # bind the toggles to the settings
         use_window = builder.get_object('use_window_checkbox')
         self.settings.bind(gs.PluginKey.USE_WINDOW,
-            use_window, 'active', Gio.SettingsBindFlags.DEFAULT)
+                           use_window, 'active', Gio.SettingsBindFlags.DEFAULT)
 
         # return the dialog
         return builder.get_object('maingrid')
