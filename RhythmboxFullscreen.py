@@ -227,6 +227,9 @@ class FullscreenView(GObject.Object, Peas.Activatable):
             key = entry.create_ext_db_key(RB.RhythmDBPropType.ALBUM)
             cover_db = RB.ExtDB(name='album-art')
             art_location = cover_db.lookup(key)
+            if art_location and not isinstance(art_location, str):
+                # RB 3.2 returns a tuple (path, key)
+                art_location = art_location[0]
 
             if art_location and path.exists(art_location):
                 return GdkPixbuf.Pixbuf.new_from_file_at_size(art_location, ALBUM_ART_W, ALBUM_ART_H)
