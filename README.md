@@ -34,13 +34,13 @@ cd rhythmbox-fullscreen
 For rhythmbox versions 2.96 to 2.99.1
 
 <pre>
-./install.sh
+./install.sh --rb2
 </pre>
 
 For rhythmbox version 3.0.1 and later
 
 <pre>
-./install.sh --rb3
+./install.sh
 </pre>
 
 
@@ -54,13 +54,13 @@ cd rhythmbox-fullscreen
 For rhythmbox versions 2.96 to 2.99.1
 
 <pre>
-./install.sh -g
+./install.sh -g --rb2
 </pre>
 
 For rhythmbox version 3.0.1 and later
 
 <pre>
-./install.sh -g --rb3
+./install.sh -g
 </pre>
 
 
