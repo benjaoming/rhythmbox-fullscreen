@@ -279,6 +279,9 @@ class FullscreenWindow(Gtk.Window):
         step = int(1 * accel)
         if step == 0:
             return
+        if not self.track_table:
+            # Scroll event called when no track_table
+            return
         track_table_size = self.track_table.size_request()
         layout_size = self.track_layout.get_size()
         scroll_height = track_table_size.height - layout_size[1]
