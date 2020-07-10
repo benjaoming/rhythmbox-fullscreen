@@ -16,6 +16,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA.
 
+import gi
+gi.require_version('PangoCairo', '1.0')
 from gi.repository import GObject  # @UnresolvedImport
 from gi.repository import Gtk  # @UnresolvedImport
 from gi.repository import Gdk  # @UnresolvedImport
@@ -239,6 +241,7 @@ class FullscreenWindow(Gtk.Window):
     def track_click(self, widget, event):
         if self.scroll_event_id:
             GObject.source_remove(self.scroll_event_id)
+            self.scroll_event_id = None
         index = self.track_widgets.index(widget)
         if index == self.current_track:
             self.backend.playpause()
@@ -269,6 +272,7 @@ class FullscreenWindow(Gtk.Window):
 
         if self.scroll_event_id:
             GObject.source_remove(self.scroll_event_id)
+            self.scroll_event_id = None
 
         if not accel == 0.0:
             self.scroll_event_id = GObject.timeout_add(time_step, self.do_scrolling, accel)
