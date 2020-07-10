@@ -29,7 +29,11 @@ from gi.repository import Gio
 from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import RB
-import lxml.etree as ET
+
+try:
+    import xml.etree.ElementTree as ET
+except ImportError:
+    import lxml.etree as ET
 
 import rb
 

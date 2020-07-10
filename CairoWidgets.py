@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA.
 
 from math import pi
-from cgi import escape
+from html import escape
 
 from gi.repository import GObject  # @UnresolvedImport
 from gi.repository import Gtk  # @UnresolvedImport
