@@ -28,6 +28,7 @@ from fullscreen_rb3compat import url2pathname
 import FullscreenWindow
 from fullscreen_rb3compat import ActionGroup
 from fullscreen_rb3compat import ApplicationShell
+from RhythmboxFullscreenPrefs import Preferences
 
 ui_str = \
     """<ui>
@@ -86,21 +87,6 @@ class FullscreenView(GObject.Object, Peas.Activatable):
         self.shell = shell
         self.entries = None
 
-        w = self.shell.props.window
-        s = w.get_screen()
-        # Using the screen of the Window, the monitor it's on can be identified
-        m = s.get_monitor_at_window(s.get_active_window())
-        # Then get the geometry of that monitor
-        monitor = s.get_monitor_geometry(m)
-        # This is an example output
-        print("Heigh: %s, Width: %s" % (monitor.height, monitor.width))
-        if monitor.height < monitor.width:
-            self.ALBUM_ART_H = monitor.height
-            self.ALBUM_ART_W = monitor.height
-        else:
-            self.ALBUM_ART_H = monitor.width
-            self.ALBUM_ART_W = monitor.width
-
         self.action_group = ActionGroup(self.shell, 'FullscreenPluginActions')
         action = self.action_group.add_action(func=self.show_fullscreen,
                                               action_name='ToggleFullscreen', label='Full Screen',
@@ -109,6 +95,22 @@ class FullscreenView(GObject.Object, Peas.Activatable):
         self._appshell = ApplicationShell(self.shell)
         self._appshell.insert_action_group(self.action_group)
         self._appshell.add_app_menuitems(ui_str, 'FullscreenPluginActions', 'view')
+
+        w = self.shell.props.window
+        s = w.get_screen()
+        # Using the screen of the Window, the monitor it's on can be identified
+        m = s.get_monitor_at_window(s.get_active_window())
+        # Then get the geometry of that monitor
+        monitor = s.get_monitor_geometry(m)
+        # This is an example output
+        print("Height: %s, Width: %s" % (monitor.height, monitor.width))
+        if monitor.height < monitor.width:
+            self.ALBUM_ART_H = monitor.height
+            self.ALBUM_ART_W = monitor.height
+        else:
+            self.ALBUM_ART_H = monitor.width
+            self.ALBUM_ART_W = monitor.width
+
 
     def do_deactivate(self):
         shell = self.object
@@ -306,3 +308,9 @@ class FullscreenView(GObject.Object, Peas.Activatable):
         self.window.change_playing_track(current_track_index)
 
         self.set_active_track_properties(player, entry, current_track_index)
+
+    def _pycharm_optimize(self):
+        # dummy procedure required for pycharm to prevent removal of
+        # preferences during optimization
+
+        x = Preferences()
