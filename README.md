@@ -26,10 +26,14 @@ Click the link below to read instructions about adding PPA.
 
 ### Local-User installation:
 
+First, run this:
+
 <pre>
 git clone https://github.com/benjaoming/rhythmbox-fullscreen
 cd rhythmbox-fullscreen
 </pre>
+
+Then, run the install script according to your Rhythmbox version.
 
 For rhythmbox versions 2.96 to 2.99.1:
 
@@ -46,10 +50,14 @@ For rhythmbox version 3.0.1 and later:
 
 ### Global-User (all-users) installation:
 
+First, run this:
+
 <pre>
 git clone https://github.com/benjaoming/rhythmbox-fullscreen
 cd rhythmbox-fullscreen
 </pre>
+
+Then, run the install script according to your Rhythmbox version.
 
 For rhythmbox versions 2.96 to 2.99.1:
 
