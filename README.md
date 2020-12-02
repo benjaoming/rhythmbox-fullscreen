@@ -1,8 +1,8 @@
-#Rhythmbox Fullscreen Plugin
+# Rhythmbox Fullscreen Plugin
 
 ![fullscreen](http://i216.photobucket.com/albums/cc33/benjaoming/Screenshotfrom2013-02-10195009_zps3f50706d.png)
 
-###What does it do?
+### What does it do?
 
 This python plugin gives you a stylish full screen window usable for parties etc.:
 
@@ -17,68 +17,68 @@ This python plugin gives you a stylish full screen window usable for parties etc
 Then activate it and press the new Full Screen button
 appearing at Rhythmbox's toolbar.
 
-###Ubuntu package
+### Ubuntu package
 
 Fossfreedom is maintaining a PPA on Launchpad with the latest release.
 Click the link below to read instructions about adding PPA.
 
 [ppa:fossfreedom/rhythmbox-plugins](https://launchpad.net/~fossfreedom/+archive/rhythmbox-plugins)
 
-###Local-User installation:
+### Local-User installation:
 
 <pre>
 git clone https://github.com/benjaoming/rhythmbox-fullscreen
 cd rhythmbox-fullscreen
 </pre>
 
-For rhythmbox versions 2.96 to 2.99.1
+For rhythmbox versions 2.96 to 2.99.1:
 
 <pre>
 ./install.sh --rb2
 </pre>
 
-For rhythmbox version 3.0.1 and later
+For rhythmbox version 3.0.1 and later:
 
 <pre>
 ./install.sh
 </pre>
 
 
-###Global-User (all-users) installation:
+### Global-User (all-users) installation:
 
 <pre>
 git clone https://github.com/benjaoming/rhythmbox-fullscreen
 cd rhythmbox-fullscreen
 </pre>
 
-For rhythmbox versions 2.96 to 2.99.1
+For rhythmbox versions 2.96 to 2.99.1:
 
 <pre>
 ./install.sh -g --rb2
 </pre>
 
-For rhythmbox version 3.0.1 and later
+For rhythmbox version 3.0.1 and later:
 
 <pre>
 ./install.sh -g
 </pre>
 
 
-###Known issues
+### Known issues
 
 Reports say that using Compiz on a 64-bit Virtualbox will trouble the progress bars and scrolling. However, using windowed mode (via the plugin preferences) should fix this. 
 
-###Usage
+### Usage
 
  - Activate the plugin.
  - To enter full screen mode, find the menu item **View->Full Screen**.
  - ...or simply hit **F12**
 
-###Technical stuff
+### Technical stuff
 
 The plugin uses custom drawn Cairo widgets in a DrawableArea and idle callbacks for animations. Everything is therefore vector graphics. 
 
-if you find an error, please run Rhythmbox from terminal with the following option:
+If you find an error, please run Rhythmbox from terminal with the following option:
 
     rhythmbox -D RhythmboxFullscreen
 
