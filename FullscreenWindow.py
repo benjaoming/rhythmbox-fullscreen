@@ -59,7 +59,14 @@ class FullscreenWindow(Gtk.Window):
         w = self
         s = w.get_screen()
         # Using the screen of the Window, the monitor it's on can be identified
-        m = s.get_monitor_at_window(s.get_active_window())
+        # get_active_window() can return None on Wayland sessions or when
+        # the window is not yet fully realized, causing a TypeError in
+        # get_monitor_at_window(). Fall back to primary monitor (index 0).
+        active_window = s.get_active_window()
+        if active_window:
+            m = s.get_monitor_at_window(active_window)
+        else:
+            m = 0
         # Then get the geometry of that monitor
         monitor = s.get_monitor_geometry(m)
         # This is an example output
